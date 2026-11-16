@@ -1,3 +1,7 @@
 export function setUpLeaderBoard(socket, races, io) {
-    socket.emit("active-session", races)
+
+    socket.on('current:state', (state)=>{
+        socket.emit('active-session', state)
+    })    
+    
 }

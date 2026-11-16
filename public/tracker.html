@@ -49,18 +49,15 @@
         
         const orientation = document.querySelector(".orientation")
         const raceMode = document.querySelector(".race-mode")
-        let countDown = {}    
-        const flags = []   
+        let countDown = {}  
 
         //-----------------------ongoing race---------------------------------------
-
         socket.on('race-ongoing', (activeRace)=>{
-            if (activeRace === null) {
+            if (activeRace === null || activeRace === undefined) {
                 status.innerHTML = "no ongoing race"
                 return
             }
 
-            let latestFlag = flags[flags.length-1]
             activeRace.countdown = countDown
 
             activeRace.entries.forEach((entry) => {
@@ -102,7 +99,7 @@
         })
 
         //track countdown
-        socket.on('countdown-started', (index, countdown)=>{
+        socket.on('countdown-started', (countdown)=>{
             countDown = countdown
         })   
         
@@ -111,7 +108,16 @@
             const trackMode = snapshot.trackMode
             raceMode.innerHTML = "Race mode: " + trackMode
         })   
+
+        //get state from front desk
+        socket.on("front-desk:state", (races)=>{
+            socket.emit('current:state', races)
+        })                 
    
 
+        //helper
+        function selectActiveSession(races) {
+            return races.find((race) => race.status === "ongoing");
+        }
    </script>
 </html>

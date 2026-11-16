@@ -28,27 +28,35 @@
         })           
 
         let index = -1 
+        let state = {
+            "sessions" : []
+        }
 
-        //track flag
+        //get state from front desk and save it in local var
+        socket.on("front-desk:state:public", (races)=>{
+            state.sessions = races.sessions
+        })          
+
+        //get flag mode from server and emit it with the current state
         socket.on("race-flag:status", (snapshot)=>{
             const trackMode = snapshot.trackMode
-            socket.emit('trackMode', trackMode)
+            socket.emit('trackMode', trackMode, state)
         })               
 
-        socket.on('race-status', (races, trackMode)=>{
-            index = getIndexOfOngoingRace(races.sessions)
-            const activeRace = selectActiveSession(races.sessions)
+        //get flag mode and state from countdown
+        socket.on('race-status', (trackMode, state)=>{
+            const activeRace = selectActiveSession(state.sessions)
             if (activeRace === null) {
                 status.innerHTML = "no ongoing race"
             }         
             if (trackMode === "safe") {
-                startCountdown(races)
+                startCountdown(state)
             } 
             if (trackMode === "finish") {
                 console.log("race finished")
                 stopTimer()
             }              
-        })        
+        })                
 
         let timer;       
 
@@ -74,8 +82,7 @@
                 const activeRace = selectActiveSession(races.sessions)
                 activeRace.countdown = {"min":min, "sec":sec}
                 displayTime(min, sec);
-                races.sessions[index] = activeRace
-                socket.emit('countdown-started', index, {"min":min, "sec":sec})
+                socket.emit('countdown-started', {"min":min, "sec":sec})
             }, 1000);
         }
 
@@ -90,18 +97,6 @@
             seconds.innerHTML = sec                
         } 
                 
-        function getIndexOfOngoingRace(races) {
-            let index = - 1
-
-            races.forEach((race) => {
-                if (race.status === "ongoing") {
-                    index = race.id - 1
-                }
-            });
-
-            return index
-        }   
-
         function selectActiveSession(races) {
             return races.find((race) => race.status === "ongoing");
         }        

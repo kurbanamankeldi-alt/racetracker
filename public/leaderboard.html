@@ -36,6 +36,13 @@
         /*show current state in leaderboard*/
         const drivers = document.querySelector(".driver-details")
 
+        //get state from front desk
+        socket.on("front-desk:state:public", (races)=>{
+            console.log(races)
+            socket.emit('current:state', races)
+        })                 
+   
+
         socket.on('active-session', (races)=>{
            const activeRace = selectActiveSession(races.sessions)    
             activeRace.entries.forEach((car) => {
@@ -48,6 +55,7 @@
 
         /*show updated state in leaderboard*/
         socket.on('laptime-added', (activeRace)=>{
+            console.log(activeRace)
             let entries = activeRace.entries
             const map = new Map()
 
@@ -70,7 +78,7 @@
         const mins = document.querySelector(".mins")
         const secs = document.querySelector(".secs")
 
-        socket.on('countdown-started', (index, countdown)=>{
+        socket.on('countdown-started', (countdown)=>{
             document.querySelector(".timer").classList.remove("hidden")
             mins.innerHTML = countdown.min
             secs.innerHTML = countdown.sec

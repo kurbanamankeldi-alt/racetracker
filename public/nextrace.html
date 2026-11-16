@@ -42,7 +42,7 @@
 
         
         //display next race after upcomming race switched to ongoing
-        socket.on("front-desk:state", (races)=>{
+        socket.on("front-desk:state:public", (races)=>{
             message.innerHTML = "Next Race"
             const nextRace = selectUpcommingSession(races.sessions)
             updatePage(nextRace, list, message)          
