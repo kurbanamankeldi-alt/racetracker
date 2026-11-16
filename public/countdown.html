@@ -17,89 +17,55 @@
 
    <script src="/socket.io/socket.io.js"></script>
    <script> 
-        const socket = io({ autoConnect: false })
+        const socket = io({
+            autoConnect: false
+        });
+
         socket.auth = {
-            interface: "race-countdown",
-        }
-        socket.connect()        
-        const status = document.getElementById("status-countdown")
+            interface: "race-countdown"
+        };
+
+        socket.connect();
+
+        const status = document.getElementById("status-countdown");
+
         socket.on('connect', () => {
-            status.innerHTML = "connected"
-        })           
+            status.innerHTML = "connected";
 
-        let index = -1 
-        let state = {
-            "sessions" : []
-        }
+            // Request the current countdown
+            socket.emit('countdown:get-state');
+        });
 
-        //get state from front desk and save it in local var
-        socket.on("front-desk:state:public", (races)=>{
-            state.sessions = races.sessions
-        })          
+        socket.on('countdown:update', (countdown) => {
+            displayTime(countdown.min, countdown.sec);
+        });
 
-        //get flag mode from server and emit it with the current state
         socket.on("race-flag:status", (snapshot)=>{
             const trackMode = snapshot.trackMode
-            socket.emit('trackMode', trackMode, state)
-        })               
+            if (trackMode === 'safe') {
+                socket.emit('countdown:start')
+            }
+            if (trackMode === 'finish') {
+                socket.emit('countdown:stop')
+            }
+        })   
 
-        //get flag mode and state from countdown
-        socket.on('race-status', (trackMode, state)=>{
-            const activeRace = selectActiveSession(state.sessions)
-            if (activeRace === null) {
-                status.innerHTML = "no ongoing race"
-            }         
-            if (trackMode === "safe") {
-                startCountdown(state)
-            } 
-            if (trackMode === "finish") {
-                console.log("race finished")
-                stopTimer()
-            }              
-        })                
 
-        let timer;       
+        socket.on('countdown:ended', () => {
+            status.innerHTML = "ended";
 
-        function startCountdown(races) {
-            clearInterval(timer);
-            let min = 9
-            let sec = 59;
-            displayTime(min, sec);
-
-            timer = setInterval(function() {
-                sec--;
-                if (sec === 0) {
-                    if (min !== 0) {
-                        min--
-                    }
-                    if (min === 0 && sec === 0) {
-                        status.innerHTML = "ended"
-                        clearInterval(timer);
-                        document.getElementById("countdown-container").classList.add("hide")
-                    }
-                    sec = 59                                                
-                }    
-                const activeRace = selectActiveSession(races.sessions)
-                activeRace.countdown = {"min":min, "sec":sec}
-                displayTime(min, sec);
-                socket.emit('countdown-started', {"min":min, "sec":sec})
-            }, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timer)
-        }
+            document
+                .getElementById("countdown-container")
+                .classList.add("hide");
+        });
 
         function displayTime(min, sec) {
-            const minutes = document.getElementById("minutes"); 
-            minutes.innerHTML = min     
-            const seconds = document.getElementById("seconds"); 
-            seconds.innerHTML = sec                
-        } 
-                
-        function selectActiveSession(races) {
-            return races.find((race) => race.status === "ongoing");
-        }        
+            document.getElementById("minutes").innerHTML =
+                String(min).padStart(2, '0');
+
+            document.getElementById("seconds").innerHTML =
+                String(sec).padStart(2, '0');
+        }    
 
    </script>
 </html>

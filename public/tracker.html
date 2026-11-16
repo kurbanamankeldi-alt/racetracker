@@ -23,8 +23,6 @@
 
 </body>
 
-
-
    <script src="/socket.io/socket.io.js"></script>
    <script> 
         //-----------------------page setup---------------------------------------
@@ -44,21 +42,30 @@
             document.getElementById('loginTracker').classList.add('hidden')
             document.getElementById('main-tracker').classList.remove('hidden')
             status.innerHTML = "connected"
+            socket.emit('races:get-state')
+            socket.emit('countdown:get-state');
         })        
 
+        socket.on('race:state-pending', () => {
+            status.innerHTML = "No ongoing race yet"
+        })
+
+        socket.on('race:state-ready', () => {
+            socket.emit('races:get-state')
+        })
         
         const orientation = document.querySelector(".orientation")
         const raceMode = document.querySelector(".race-mode")
-        let countDown = {}  
+        let countDown = {}
 
         //-----------------------ongoing race---------------------------------------
         socket.on('race-ongoing', (activeRace)=>{
+            orientation.innerHTML = ""
+
             if (activeRace === null || activeRace === undefined) {
                 status.innerHTML = "no ongoing race"
                 return
             }
-
-            activeRace.countdown = countDown
 
             activeRace.entries.forEach((entry) => {
                 const button = document.createElement("button")
@@ -70,17 +77,16 @@
                     let carObj = activeRace.entries[entry.carNumber-1]
 
                     if (carObj.times === null || carObj.times === undefined) {
-                        carObj.times = [{"min": 9, "sec": 60}];
+                        carObj.times = [{ "min": 10, "sec": 0 }];
                     }
                     
                     carObj.laptime = [];
-                    carObj.times.push(countDown);
+                    carObj.times.push({...countDown});
 
                     for(let i=1; i<carObj.times.length; i++) {
-                       carObj.laptime.push({
-                            "min": carObj.times[i-1].min-carObj.times[i].min, 
-                            "sec" : carObj.times[i-1].sec-carObj.times[i].sec
-                        })
+                        carObj.laptime.push(
+                            getLapTime(carObj.times[i-1], carObj.times[i])
+                        );
                     }
                     
                     socket.emit('laptime-added', activeRace)
@@ -98,8 +104,9 @@
             }
         })
 
-        //track countdown
-        socket.on('countdown-started', (countdown)=>{
+        //track countdown from server
+        socket.on('countdown:update', (countdown)=>{
+            console.log(countdown)
             countDown = countdown
         })   
         
@@ -112,12 +119,24 @@
         //get state from front desk
         socket.on("front-desk:state", (races)=>{
             socket.emit('current:state', races)
-        })                 
+        })                     
    
-
         //helper
         function selectActiveSession(races) {
             return races.find((race) => race.status === "ongoing");
         }
+
+        function toSeconds(time) {
+            return time.min * 60 + time.sec;
+        }
+
+        function getLapTime(previous, current) {
+            const difference = toSeconds(previous) - toSeconds(current);
+
+            return {
+                min: Math.floor(difference / 60),
+                sec: difference % 60
+            };
+        }        
    </script>
 </html>
