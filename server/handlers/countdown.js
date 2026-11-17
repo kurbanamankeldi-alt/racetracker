@@ -3,7 +3,7 @@ import { raceEvents } from "../events.js";
 let countdownInterval;
 
 let countdown = {
-    min: 10,
+    min: 1,
     sec: 0
 };
 

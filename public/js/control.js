@@ -9,7 +9,7 @@ const safeBtn = document.getElementById("safe")
 const hazardBtn = document.getElementById("hazard")
 const dangerBtn = document.getElementById("danger")
 const finishbutton = document.getElementById("finish")
-
+let countdownEnded = false
 
 
 
@@ -85,9 +85,10 @@ newFlag.textContent= `Current Flag: ${trackMode}`
 })
 
 
-
-
-
+socket.on('countdown:ended', ()=> {
+    countdownEnded = true
+    console.log(countdownEnded)
+})
 
 
 //current session
