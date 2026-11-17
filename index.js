@@ -7,7 +7,7 @@ import { races } from "./server/state.js"
 import { setUpFrontDesk } from "./server/handlers/reception.js"
 import { setUpControl } from "./server/handlers/control.js"
 import { setUpLapline } from "./server/handlers/tracker.js"
-import { setUpCountDown } from "./server/handlers/countdown.js"
+import { setUpCountDown, initializeCountDown } from "./server/handlers/countdown.js"
 import { setUpLeaderBoard } from "./server/handlers/leaderboard.js"
 import { setUpNextRace } from "./server/handlers/nextrace.js"
 
@@ -57,6 +57,7 @@ if (config) {
 
     const io = new Server(server)
     setUpAuth(io, config)
+    initializeCountDown(io);    
 
     io.on("connection", (socket) => {
         console.log("client connected")

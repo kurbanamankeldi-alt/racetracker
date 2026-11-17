@@ -40,17 +40,6 @@
             displayTime(countdown.min, countdown.sec);
         });
 
-        socket.on("race-flag:status", (snapshot)=>{
-            const trackMode = snapshot.trackMode
-            if (trackMode === 'safe') {
-                socket.emit('countdown:start')
-            }
-            if (trackMode === 'finish') {
-                socket.emit('countdown:stop')
-            }
-        })   
-
-
         socket.on('countdown:ended', () => {
             status.innerHTML = "ended";
 

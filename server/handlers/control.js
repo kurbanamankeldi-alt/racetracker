@@ -1,5 +1,6 @@
 
 import { getSessionIdxBySessionId} from "./reception.js"
+import { raceEvents } from "../events.js";
 
 export function setUpControl(socket, races, io) {
     //send initial flag
@@ -12,6 +13,11 @@ export function setUpControl(socket, races, io) {
         
         const {trackMode} = data
         races.trackMode = trackMode
+
+        raceEvents.emit("race-flag:change", {
+            trackMode: races.trackMode
+        });        
+
         acknowledge({ok:true})
         console.log("new flag:", races.trackMode)
         io.to("public").emit("race-flag:status", {trackMode: races.trackMode})

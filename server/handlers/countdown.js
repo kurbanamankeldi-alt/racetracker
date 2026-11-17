@@ -1,9 +1,26 @@
+import { raceEvents } from "../events.js";
+
 let countdownInterval;
 
 let countdown = {
-    min: 9,
-    sec: 60
+    min: 10,
+    sec: 0
 };
+
+export function initializeCountDown(io) {
+
+    raceEvents.on("race-flag:change", (snapshot) => {
+        console.log("Countdown received:", snapshot.trackMode);
+        
+        if (snapshot.trackMode === "safe") {
+            startCountDown(io);
+        }
+
+        if (snapshot.trackMode === "finish") {
+            stopCountDown();
+        }
+    });
+}
 
 export function setUpCountDown(socket, races, io) {
 
@@ -11,9 +28,10 @@ export function setUpCountDown(socket, races, io) {
     socket.on('countdown:get-state', () => {
         socket.emit('countdown:update', countdown);
     });
+    
+}
 
-    // Start countdown
-    socket.on('countdown:start', () => {
+function startCountDown(io) {
         if (countdownInterval) return;
 
         countdownInterval = setInterval(() => {
@@ -34,14 +52,12 @@ export function setUpCountDown(socket, races, io) {
 
             io.emit('countdown:update', countdown);
 
-        }, 1000);
-    });
+        }, 1000);    
+}
 
-    // Stop countdown
-    socket.on('countdown:stop', () => {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    });
+function stopCountDown() {
+    clearInterval(countdownInterval);
+    countdownInterval = null;    
 }
 
 export function selectActiveSession(races) {
