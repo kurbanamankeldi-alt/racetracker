@@ -25,118 +25,114 @@
 
    <script src="/socket.io/socket.io.js"></script>
    <script> 
-        //-----------------------page setup---------------------------------------
-        const socket = io({ autoConnect: false })
-        const status = document.getElementById("statusTracker")
+        //page setup
+        const socket = io({
+            autoConnect: false
+        });
+
+        const status = document.getElementById("statusTracker");
+        const orientation = document.querySelector(".orientation");
+        const raceMode = document.querySelector(".race-mode");
+        const mainTracker = document.getElementById("main-tracker");
+
+        let activeRace = null;
 
         document.getElementById("loginTracker").addEventListener("submit", (event) => {
-                event.preventDefault()
+                event.preventDefault();
                 socket.auth = {
                     interface: "lap-line-tracker",
                     accessKey: document.getElementById("key").value
-                }
-                socket.connect()
-        })        
+                };
+                socket.connect();
+            });
+
+
+        //connection
 
         socket.on('connect', () => {
-            document.getElementById('loginTracker').classList.add('hidden')
-            document.getElementById('main-tracker').classList.remove('hidden')
-            status.innerHTML = "connected"
-            socket.emit('races:get-state')
-            socket.emit('countdown:get-state');
-        })        
+            document.getElementById('loginTracker').classList.add('hidden');
+            mainTracker.classList.remove('hidden');
+            status.innerHTML = "Connected";
 
-        socket.on('race:state-pending', () => {
-            status.innerHTML = "No ongoing race yet"
-        })
+            //current state
+            socket.emit('races:get-state');
+        });
 
-        socket.on('race:state-ready', () => {
-            socket.emit('races:get-state')
-        })
-        
-        const orientation = document.querySelector(".orientation")
-        const raceMode = document.querySelector(".race-mode")
-        let countDown = {}
+        socket.on('disconnect', () => {
+            status.innerHTML = "Disconnected";
+        });
 
-        //-----------------------ongoing race---------------------------------------
-        socket.on('race-ongoing', (activeRace)=>{
-            orientation.innerHTML = ""
+        socket.on('connect_error', (error) => {
+            status.innerHTML = "Connection error: " + error.message;
+        });
 
-            if (activeRace === null || activeRace === undefined) {
-                status.innerHTML = "no ongoing race"
-                return
+
+        //render initial state
+        socket.on('race-ongoing', (race) => {
+            renderRace(race);
+        });
+
+
+        //track session updates
+        socket.on('front-desk:state:public', ({ sessions }) => {
+            const race = selectActiveSession(sessions);
+            renderRace(race);
+        });
+
+
+        //laptime added
+        socket.on('laptime-added', (race) => {
+            renderRace(race);
+        });
+
+        //ended race
+        socket.on('session-ended', (ended) => {
+            if (ended) {
+                mainTracker.classList.add("hidden");
+                activeRace = null;
+                orientation.innerHTML = "";
+                status.innerHTML = "Race session is ended";
+            }
+        });
+
+        //track flag
+        socket.on('race-flag:status', (snapshot) => {
+            raceMode.innerHTML = "Race mode: " + snapshot.trackMode;
+        });
+
+
+        //helpers
+        function selectActiveSession(sessions) {
+            return sessions.find(race => race.status === "ongoing") 
+        }
+
+        function renderRace(race) {
+            activeRace = race;
+            orientation.innerHTML = "";
+
+            if (!activeRace) {
+                status.innerHTML = "No ongoing race";
+                return;
             }
 
             activeRace.entries.forEach((entry) => {
-                const button = document.createElement("button")
-                button.innerHTML = entry.carNumber
-                button.classList.add("cars")
-                orientation.appendChild(button)
-
-                button.addEventListener("click", ()=> {
-                    let carObj = activeRace.entries[entry.carNumber-1]
-
-                    if (carObj.times === null || carObj.times === undefined) {
-                        carObj.times = [{ "min": 10, "sec": 0 }];
-                    }
-                    
-                    carObj.laptime = [];
-                    carObj.times.push({...countDown});
-
-                    for(let i=1; i<carObj.times.length; i++) {
-                        carObj.laptime.push(
-                            getLapTime(carObj.times[i-1], carObj.times[i])
-                        );
-                    }
-                    
-                    socket.emit('laptime-added', activeRace)
-                })
+                const button = document.createElement("button");
+                button.innerHTML = entry.carNumber;
+                button.classList.add("cars");
+                orientation.appendChild(button);
+                button.addEventListener("click", () => {
+                    recordLap(entry.carNumber);
+                });
             });
-            status.innerHTML = "Race session is " + activeRace.status
-        })
-        
-        //-----------------------ended race---------------------------------------        
-        socket.on('session-ended', (ended)=> {
-            if (ended) {
-                document.querySelector("#main-tracker").remove()
-                raceMode.remove()
-                status.innerHTML = "Race session is ended"
-            }
-        })
 
-        //track countdown from server
-        socket.on('countdown:update', (countdown)=>{
-            console.log(countdown)
-            countDown = countdown
-        })   
-        
-        //track flag
-        socket.on("race-flag:status", (snapshot)=>{
-            const trackMode = snapshot.trackMode
-            raceMode.innerHTML = "Race mode: " + trackMode
-        })   
-
-        //get state from front desk
-        socket.on("front-desk:state", (races)=>{
-            socket.emit('current:state', races)
-        })                     
-   
-        //helper
-        function selectActiveSession(races) {
-            return races.find((race) => race.status === "ongoing");
-        }
-
-        function toSeconds(time) {
-            return time.min * 60 + time.sec;
-        }
-
-        function getLapTime(previous, current) {
-            const difference = toSeconds(previous) - toSeconds(current);
-
-            return {
-                min: Math.floor(difference / 60),
-                sec: difference % 60
-            };
+            status.innerHTML = "Race session is " + activeRace.status;
         }        
+
+        function recordLap(carNumber) {
+            if (!activeRace) return;
+            socket.emit('laptime:add', {sessionId: activeRace.id, 
+                carNumber: carNumber});
+        }     
+           
    </script>
 </html>

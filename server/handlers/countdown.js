@@ -7,11 +7,15 @@ let countdown = {
     sec: 0
 };
 
+export function getCountdownState() {
+    return { ...countdown };
+}
+
 export function initializeCountDown(io) {
 
     raceEvents.on("race-flag:change", (snapshot) => {
         console.log("Countdown received:", snapshot.trackMode);
-        
+
         if (snapshot.trackMode === "safe") {
             startCountDown(io);
         }
@@ -23,12 +27,9 @@ export function initializeCountDown(io) {
 }
 
 export function setUpCountDown(socket, races, io) {
-
-    // Send current countdown to newly connected clients
     socket.on('countdown:get-state', () => {
         socket.emit('countdown:update', countdown);
     });
-    
 }
 
 function startCountDown(io) {

@@ -75,7 +75,6 @@ if (config) {
         if(socket.data.role === "observer") {
             socket.join("staff")
             socket.join("public")
-            socket.join('lap-line-tracker')
             setUpLapline(socket, races, io)
         }        
         if(socket.data.role === "public") {

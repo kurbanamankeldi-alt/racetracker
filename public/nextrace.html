@@ -1,72 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Race</title>
-    <link rel="stylesheet" href="/css/nextrace.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Next Race</title>
+        <link rel="stylesheet" href="/css/nextrace.css">
+    </head>
 <body>
     <div class="container-nextrace">
-        <p class="connection-status">not connected</p>
+        <p class="connection-status">Not connected</p>
         <div class="race">
             <h2 class="message"></h2>
-            <ul class="current-race-details">
-
-            </ul>
+            <ul class="current-race-details"></ul>
         </div>
     </div>
 
-   <script src="/socket.io/socket.io.js"></script>
-   <script> 
-        const socket = io({ autoConnect: false })
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        //page setup
+
+        const socket = io({
+            autoConnect: false
+        });
+
         socket.auth = {
-            interface: "next-race",
-        }
-        socket.connect()           
+            interface: "next-race"
+        };
 
-        const status = document.querySelector(".connection-status")
-        const race = document.querySelector(".race")
-        const message = document.querySelector(".message")
-        const list = document.querySelector(".current-race-details")
+        const status = document.querySelector(".connection-status");
+        const message = document.querySelector(".message");
+        const list = document.querySelector(".current-race-details");
 
+
+        //connection
+        socket.connect();
         socket.on('connect', () => {
-            status.innerHTML = "connected"
-        })                
+            status.innerHTML = "Connected";
+            // Request current upcoming race
+            socket.emit('nextrace:get-state');
+        });
 
-        //listen and display upcomming race until it starts
-        socket.on('upcomming-race', (upcommingRace)=> {
-            message.innerHTML = "Please Proceed to Paddock"
-            updatePage(upcommingRace, list, message)
-        })
+        socket.on('disconnect', () => {
+            status.innerHTML = "Disconnected";
+        });
 
-        
-        //display next race after upcomming race switched to ongoing
-        socket.on("front-desk:state:public", (races)=>{
-            message.innerHTML = "Next Race"
-            const nextRace = selectUpcommingSession(races.sessions)
-            updatePage(nextRace, list, message)          
-        })             
+
+        //initial setup
+        socket.on('upcoming-race', (upcomingRace) => {
+            updatePage(upcomingRace, "Please Proceed to Paddock");
+        });
+
+
+        //track sessions
+        socket.on('front-desk:state:public', ({ sessions }) => {
+            const nextRace = selectUpcomingSession(sessions);
+            updatePage(nextRace, "Next Race");
+        });
+
+
+        //update page
+        function updatePage(raceData, heading) {
+            list.innerHTML = "";
+
+            if (!raceData) {
+                message.innerHTML = "No upcoming race";
+                return;
+            }
+
+            message.innerHTML = heading;
+
+            raceData.entries.forEach((driver) => {
+                const item = document.createElement("li");
+                item.classList.add("car-details");
+                item.textContent = `${driver.name} ${driver.carNumber}`;
+                list.appendChild(item);
+            });
+        }
+
 
         //helpers
-        function updatePage(raceData, list, message) {
-            if (raceData === null || raceData === undefined) {
-                message.innerHTML = "No upcomming race"
-                return
-            }
-            list.innerHTML = "";
-            raceData.entries.forEach((driver) => {
-                const item = document.createElement("li")
-                item.classList.add("car-details")
-                item.textContent = `${driver.name} ${driver.carNumber}`
-                list.appendChild(item)
-            })        
+        function selectUpcomingSession(sessions) {
+            return sessions.find(race => race.status === "upcoming")
         }
 
-        function selectUpcommingSession(races) {
-            return races.find((race) => race.status === "upcoming");
-        }               
-
     </script>
+
 </body>
+
 </html>

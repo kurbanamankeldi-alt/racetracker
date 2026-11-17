@@ -26,12 +26,11 @@
         };
 
         socket.connect();
-
+        
         const status = document.getElementById("status-countdown");
 
         socket.on('connect', () => {
             status.innerHTML = "connected";
-
             // Request the current countdown
             socket.emit('countdown:get-state');
         });
@@ -42,18 +41,12 @@
 
         socket.on('countdown:ended', () => {
             status.innerHTML = "ended";
-
-            document
-                .getElementById("countdown-container")
-                .classList.add("hide");
+            document.getElementById("countdown-container").classList.add("hide");
         });
 
         function displayTime(min, sec) {
-            document.getElementById("minutes").innerHTML =
-                String(min).padStart(2, '0');
-
-            document.getElementById("seconds").innerHTML =
-                String(sec).padStart(2, '0');
+            document.getElementById("minutes").innerHTML = String(min).padStart(2, '0');
+            document.getElementById("seconds").innerHTML = String(sec).padStart(2, '0');
         }    
 
    </script>

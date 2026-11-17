@@ -1,10 +1,12 @@
-import { selectActiveSession } from "./tracker.js";
-
 export function setUpNextRace(socket, races, io) {
-    const upcomingRace = selectUpcommingSession(races.sessions)
-    socket.emit('upcomming-race', upcomingRace)
+    //intial state
+    socket.on('nextrace:get-state', () => {
+        const upcomingRace = selectUpcomingSession(races.sessions);
+        socket.emit('upcoming-race', upcomingRace);
+    });
+
 }
 
-function selectUpcommingSession(races) {
-    return races.find((race) => race.status === "upcoming");
+function selectUpcomingSession(sessions) {
+    return sessions.find( ace => race.status === "upcoming")
 }
