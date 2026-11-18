@@ -3,8 +3,9 @@ import { raceEvents } from "../events.js";
 let countdownInterval;
 
 let countdown = {
-    min: 1,
-    sec: 0
+    min: 10,
+    sec: 0,
+    status: "ready"
 };
 
 export function getCountdownState() {
@@ -13,22 +14,39 @@ export function getCountdownState() {
 
 export function initializeCountDown(io) {
 
-    raceEvents.on("race-flag:change", (snapshot) => {
-        console.log("Countdown received:", snapshot.trackMode);
+    raceEvents.on("race:start", () => {
+        console.log("Countdown: race started");
+        stopCountDown();
 
-        if (snapshot.trackMode === "safe") {
-            startCountDown(io);
-        }
+        countdown = {
+            min: 10,
+            sec: 0,
+            status: "running"
+        };
 
-        if (snapshot.trackMode === "finish") {
-            stopCountDown();
-        }
+        io.emit("countdown:update", countdown);
+        startCountDown(io);
     });
+
+    raceEvents.on("race:finish", () => {
+        console.log("Countdown: race finished");
+        stopCountDown();
+        countdown.status = "finished";
+        io.emit("countdown:update", countdown);        
+    });    
+
+    raceEvents.on("race:end", () => {
+        console.log("Countdown: race ended");
+        stopCountDown();
+        countdown.status = "ended";
+        io.emit("countdown:update", countdown);        
+    });
+    
 }
 
 export function setUpCountDown(socket, races, io) {
     socket.on('countdown:get-state', () => {
-        socket.emit('countdown:update', countdown);
+        socket.emit('countdown:update', getCountdownState());
     });
 }
 
@@ -38,9 +56,12 @@ function startCountDown(io) {
         countdownInterval = setInterval(() => {
 
             if (countdown.min === 0 && countdown.sec === 0) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-                io.emit('countdown:ended');
+                stopCountDown();
+                countdown.status = "finished";
+                io.emit("countdown:update", countdown);
+                io.emit("countdown:ended");  
+                //notify server
+                raceEvents.emit("countdown:expired");              
                 return;
             }
 
@@ -63,4 +84,4 @@ function stopCountDown() {
 
 export function selectActiveSession(races) {
     return races.find((race) => race.status === "ongoing");
-}    
+}

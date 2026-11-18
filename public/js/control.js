@@ -9,8 +9,6 @@ const safeBtn = document.getElementById("safe")
 const hazardBtn = document.getElementById("hazard")
 const dangerBtn = document.getElementById("danger")
 const finishbutton = document.getElementById("finish")
-let countdownEnded = false
-
 
 
 //check key
@@ -52,6 +50,7 @@ socket.on("disconnect", () => {
 //listen buttons
 endbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ended"}, showResponse)
+    socket.emit('end-clicked')
 })
 startbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ongoing"},showResponse)
@@ -59,6 +58,7 @@ startbutton.addEventListener("click", e=>{
     //socket.emit("countdown-started")
     //change flag
     socket.emit("race-flag:change", {trackMode: "safe"}, showResponse)
+    socket.emit('start-clicked')
 })
 
 finishbutton.addEventListener("click", e=>{
@@ -82,12 +82,6 @@ const trackMode = snapshot.trackMode
 const newFlag = document.getElementById("currentFlag")
 newFlag.textContent= `Current Flag: ${trackMode}`
 
-})
-
-
-socket.on('countdown:ended', ()=> {
-    countdownEnded = true
-    console.log(countdownEnded)
 })
 
 

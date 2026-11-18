@@ -28,6 +28,7 @@
         socket.connect();
         
         const status = document.getElementById("status-countdown");
+        const container = document.getElementById("countdown-container");
 
         socket.on('connect', () => {
             status.innerHTML = "connected";
@@ -37,11 +38,29 @@
 
         socket.on('countdown:update', (countdown) => {
             displayTime(countdown.min, countdown.sec);
+            if (countdown.status === "ready") {
+                status.innerHTML = "Waiting for race to start";
+                container.classList.remove("hide");
+            }
+
+            if (countdown.status === "running") {
+                status.innerHTML = "Race in progress";
+                container.classList.remove("hide");
+            }
+
+            if (countdown.status === "finished") {
+                status.innerHTML = "Race finished";
+                container.classList.remove("hide");
+            }
+
+            if (countdown.status === "ended") {
+                status.innerHTML = "Race session ended";
+                container.classList.add("hide");
+            }            
         });
 
         socket.on('countdown:ended', () => {
-            status.innerHTML = "ended";
-            document.getElementById("countdown-container").classList.add("hide");
+            status.innerHTML = "Race finished";
         });
 
         function displayTime(min, sec) {
