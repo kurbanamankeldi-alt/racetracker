@@ -8,5 +8,5 @@ export function setUpNextRace(socket, races, io) {
 }
 
 function selectUpcomingSession(sessions) {
-    return sessions.find( ace => race.status === "upcoming")
+    return sessions.find( race => race.status === "upcoming")
 }
