@@ -42,9 +42,15 @@ export function setUpLapline(socket, races, io) {
         const currentTime = getCountdownState();
 
         //add properties to carobj to calculate the lap time
-        carObj.times = [{ min: 10, sec: 0 }];
+        if (!carObj.times) {
+            carObj.times = [{ min: 10, sec: 0 }];
+        }
+
+        if (!carObj.laptime) {
+            carObj.laptime = [];
+        }
         carObj.times.push(currentTime);
-        carObj.laptime = [];
+     
 
         for (let i = 1; i < carObj.times.length; i++) {
             carObj.laptime.push(getLapTime(carObj.times[i - 1],carObj.times[i]));
@@ -52,7 +58,7 @@ export function setUpLapline(socket, races, io) {
 
         //laptime added broadcast
         io.to('public').emit('laptime-added', activeRace);
-
+        
         console.log(`Lap recorded: Car ${carNumber}, Session ${activeRace.id}`);
 
     });
