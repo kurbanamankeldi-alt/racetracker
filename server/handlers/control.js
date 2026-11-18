@@ -1,5 +1,6 @@
 
 import { getSessionIdxBySessionId} from "./reception.js"
+import { raceEvents } from "../events.js";
 
 export function setUpControl(socket, races, io) {
     //send initial flag
@@ -11,7 +12,13 @@ export function setUpControl(socket, races, io) {
     socket.on("race-flag:change",(data, acknowledge)=>{
         
         const {trackMode} = data
-        races.trackMode = trackMode
+        races.trackMode = trackMode    
+        
+        if (trackMode === "finish") {
+            raceEvents.emit("race:finish");  
+        }
+         
+
         acknowledge({ok:true})
         console.log("new flag:", races.trackMode)
         io.to("public").emit("race-flag:status", {trackMode: races.trackMode})
@@ -27,5 +34,39 @@ export function setUpControl(socket, races, io) {
         races.sessions[sessionInd].status= newStatus
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
+
     })
+
+    //send start and end button clicks
+    socket.on('start-clicked', ()=>{
+        raceEvents.emit("race:start");          
+    })
+
+    socket.on('end-clicked', ()=>{
+        raceEvents.emit("race:end");          
+    })      
+}
+
+//listen to countdown expired
+export function initializeRaceControl(races, io) {
+
+    raceEvents.on("countdown:expired", () => {
+        console.log("Countdown expired");
+
+        finishRace(races, io);
+    });
+}
+
+// finish logic
+export function finishRace(races, io) {
+    if (races.trackMode === "finish") return;
+
+    races.trackMode = "finish";
+
+    raceEvents.emit("race:finish");
+
+    io.to("public").emit("race-flag:status", {
+        trackMode: races.trackMode
+    });
 }

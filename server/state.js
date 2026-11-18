@@ -2,19 +2,6 @@
 export const races = {
   "sessions": [
     {
-      "id": 1,
-      "status": "finishing", // ongoing, finishing, ended
-      "entries": [
-        {"name": "Alice", "carNumber": 1 },
-        {"name": "Bob", "carNumber": 2 }
-      ]
-    },
-    {
-      "id": 2,
-      "status": "upcoming",
-      "entries": []
-    },
-    {
       "id": 3,
       "status": "upcoming",
       "entries": [

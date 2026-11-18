@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="/css/leaderboard.css">
+</head>
+
+<body>
+    <p id="status-board">Not connected</p>
+    <div class="leader-board">
+        <div class="flag">
+            No flag raised yet
+            <span class="color"></span>
+        </div>
+
+        <div class="timer hidden">
+            <span class="mins">10</span> :
+            <span class="secs">00</span>
+        </div>
+
+        <div class="current-session">
+            <ul class="driver-details"></ul>
+        </div>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        //page setup
+        const socket = io({
+            autoConnect: false
+        });
+
+        socket.auth = {
+            interface: "leader-board"
+        };
+
+        const status = document.getElementById("status-board");
+        const drivers = document.querySelector(".driver-details");
+        const mins = document.querySelector(".mins");
+        const secs = document.querySelector(".secs");
+        const timer = document.querySelector(".timer");
+        const flag = document.querySelector(".flag");
+        let activeRace = null;
+
+        //connection
+        socket.connect();
+
+        socket.on('connect', () => {
+            status.innerHTML = "Connected";
+
+            // Request initial race state
+            socket.emit('races:get-state');
+
+            // Request current countdown
+            socket.emit('countdown:get-state');
+
+        });
+
+
+        socket.on('disconnect', () => {
+            status.innerHTML = "Disconnected";
+        });
+
+
+        //initial state
+        socket.on('active-session', (race) => {
+            renderLeaderboard(race);
+        });
+
+
+        //session update
+        socket.on('front-desk:state', ({ sessions }) => {
+            const race = selectActiveSession(sessions);
+            renderLeaderboard(race);
+        });
+
+
+        //comming from tracker, laptime added
+        socket.on('laptime-added', (race) => {
+            renderLeaderboard(race);
+        });
+
+
+        //leaderboard
+        function renderLeaderboard(race) {
+            activeRace = race;
+
+            drivers.innerHTML = "";
+
+            if (!activeRace) {
+                status.innerHTML = "No ongoing race";
+                return;
+            }
+
+            activeRace.entries.forEach((car) => {
+                const list = document.createElement("li");
+                list.id = `car-${car.carNumber}`;
+                list.dataset.laptime = "";
+                drivers.appendChild(list);
+                updateDriver(list, car);
+            });
+
+            sortBoard();
+
+            status.innerHTML = "Race session: " + activeRace.id;
+        }
+
+
+        //update driver
+        function updateDriver(list, car) {
+            console.log(car)
+            const lapCount = Array.isArray(car.times) ? Math.max(0, car.times.length - 1) : 0;
+            const lapTimes = Array.isArray(car.laptime) ? car.laptime : [];
+            const fastest = getIndexOfFastestLap(lapTimes);
+
+            if (!fastest) {
+                list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | No lap recorded`;
+                list.dataset.laptime = "";
+                return;
+            }
+
+            const bestLap = lapTimes[fastest.index];
+
+            list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | Best: ${formatTime(bestLap)}`;
+            list.dataset.laptime = fastest.min;
+        }
+
+        //fastest lap
+        function getIndexOfFastestLap(laptimes) {
+            if (laptimes.length === 0) {
+                return null;
+            }
+
+            let min = Infinity;
+            let index = -1;
+
+            laptimes.forEach((lap, i) => {
+                const totalSeconds = lap.min * 60 + lap.sec;
+                if (totalSeconds < min) {
+                    min = totalSeconds;
+                    index = i;
+                }
+            });
+
+            if (index === -1) return null;
+
+            return {index, min};
+        }
+
+
+        //sortboard
+        function sortBoard() {
+            const items = Array.from(drivers.children);
+            items.sort((a, b) => {
+                const aTime = a.dataset.laptime;
+                const bTime = b.dataset.laptime;
+
+                // if no laptime put to last
+                if (aTime === "" && bTime === "") return 0;
+                if (aTime === "") return 1;
+                if (bTime === "") return -1;
+
+                return Number(aTime) - Number(bTime);
+            });
+
+            items.forEach(item => {
+                drivers.appendChild(item);
+
+            });
+        }
+
+
+        //track countdown
+        socket.on('countdown:update', (countdown) => {
+            timer.classList.remove("hidden");
+            mins.innerHTML = String(countdown.min).padStart(2, '0');
+            secs.innerHTML = String(countdown.sec).padStart(2, '0');
+        });
+
+
+        socket.on('countdown:ended', () => {
+            timer.classList.add("hidden");
+        });
+
+
+        //track flag
+        socket.on('race-flag:status', (snapshot) => {
+            const trackMode = snapshot.trackMode;
+            flag.textContent = trackMode;
+            flag.classList.remove("green", "yellow", "red");
+
+            if (trackMode === "safe") {
+                flag.classList.add("green");
+            }
+
+            if (trackMode === "hazard") {
+                flag.classList.add("yellow");
+            }
+
+            if (trackMode === "danger") {
+                flag.classList.add("red");
+            }
+        });
+
+
+        //helper
+        function selectActiveSession(sessions) {
+            return sessions.find(race => race.status === "ongoing")
+        }
+
+        function formatTime(time) {
+            return (
+                String(time.min).padStart(2, '0') +
+                ":" +
+                String(time.sec).padStart(2, '0')
+            );
+        }
+
+    </script>
+
+</body>
+
+</html>

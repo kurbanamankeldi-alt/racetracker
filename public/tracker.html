@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line tracker</title>
+    <link rel="stylesheet" href="/css/tracker.css">
+</head>
+<body>
+    <h1>Lap line observer</h1>
+    <form id="loginTracker" class="">
+        <input id="key" type="password" placeholder="Race Observer key" required>
+        <button>Connect</button>
+    </form>
+    <p id="statusTracker">Not connected</p>    
+    <p class="race-mode"></p>    
+    <div id="main-tracker" class="hidden">
+        <div class="race-status"></div>
+        <div class="container">
+            <div class="orientation"></div>
+        </div>
+    </div>
+
+</body>
+
+   <script src="/socket.io/socket.io.js"></script>
+   <script> 
+        //page setup
+        const socket = io({
+            autoConnect: false
+        });
+
+        const status = document.getElementById("statusTracker");
+        const orientation = document.querySelector(".orientation");
+        const raceMode = document.querySelector(".race-mode");
+        const mainTracker = document.getElementById("main-tracker");
+
+        let activeRace = null;
+
+        document.getElementById("loginTracker").addEventListener("submit", (event) => {
+                event.preventDefault();
+                socket.auth = {
+                    interface: "lap-line-tracker",
+                    accessKey: document.getElementById("key").value
+                };
+                socket.connect();
+            });
+
+
+        //connection
+
+        socket.on('connect', () => {
+            document.getElementById('loginTracker').classList.add('hidden');
+            mainTracker.classList.remove('hidden');
+            status.innerHTML = "Connected";
+
+            //current state
+            socket.emit('races:get-state');
+        });
+
+        socket.on('disconnect', () => {
+            status.innerHTML = "Disconnected";
+        });
+
+        socket.on('connect_error', (error) => {
+            status.innerHTML = "Connection error: " + error.message;
+        });
+
+
+        //render initial state
+        socket.on('race-ongoing', (race) => {
+            renderRace(race);
+        });
+
+
+        //track session updates
+        socket.on('front-desk:state', ({ sessions }) => {
+            const race = selectActiveSession(sessions);
+            renderRace(race);
+        });
+
+
+        //laptime added
+        socket.on('laptime-added', (race) => {
+            renderRace(race);
+        });
+
+        //ended race
+        socket.on('session-ended', (ended) => {
+            if (ended) {
+                mainTracker.classList.add("hidden");
+                activeRace = null;
+                orientation.innerHTML = "";
+                status.innerHTML = "Race session is ended";
+            }
+        });
+
+        //track flag
+        socket.on('race-flag:status', (snapshot) => {
+            raceMode.innerHTML = "Race mode: " + snapshot.trackMode;
+        });
+
+        //track end of timer
+        socket.on('countdown:ended', () => {
+            orientation.innerHTML = "";
+        });           
+
+        //helpers
+        function selectActiveSession(sessions) {
+            return sessions.find(race => race.status === "ongoing") 
+        }
+
+        function renderRace(race) {
+            activeRace = race;
+            orientation.innerHTML = "";
+
+            if (!activeRace) {
+                status.innerHTML = "No ongoing race";
+                return;
+            }
+
+            activeRace.entries.forEach((entry) => {
+                const button = document.createElement("button");
+                button.innerHTML = entry.carNumber;
+                button.classList.add("cars");
+                orientation.appendChild(button);
+                button.addEventListener("click", () => {
+                    recordLap(entry.carNumber);
+                });
+            });
+
+            status.innerHTML = "Race session is " + activeRace.status;
+        }        
+
+        function recordLap(carNumber) {
+            if (!activeRace) return;
+            socket.emit('laptime:add', {sessionId: activeRace.id, 
+                carNumber: carNumber});
+        }     
+           
+   </script>
+</html>

@@ -11,8 +11,6 @@ const dangerBtn = document.getElementById("danger")
 const finishbutton = document.getElementById("finish")
 
 
-
-
 //check key
 document.getElementById("login").addEventListener("submit", (event) => {
 event.preventDefault()
@@ -52,6 +50,7 @@ socket.on("disconnect", () => {
 //listen buttons
 endbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ended"}, showResponse)
+    socket.emit('end-clicked')
 })
 startbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ongoing"},showResponse)
@@ -59,6 +58,7 @@ startbutton.addEventListener("click", e=>{
     //socket.emit("countdown-started")
     //change flag
     socket.emit("race-flag:change", {trackMode: "safe"}, showResponse)
+    socket.emit('start-clicked')
 })
 
 finishbutton.addEventListener("click", e=>{
@@ -83,11 +83,6 @@ const newFlag = document.getElementById("currentFlag")
 newFlag.textContent= `Current Flag: ${trackMode}`
 
 })
-
-
-
-
-
 
 
 //current session
