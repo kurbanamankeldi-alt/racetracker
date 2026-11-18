@@ -53,7 +53,7 @@
 
 
         //track sessions
-        socket.on('front-desk:state:public', ({ sessions }) => {
+        socket.on('front-desk:state', ({ sessions }) => {
             const nextRace = selectUpcomingSession(sessions);
             updatePage(nextRace, "Next Race");
         });

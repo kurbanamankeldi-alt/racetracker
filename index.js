@@ -91,3 +91,20 @@ if (config) {
         console.log("Server running at http://localhost:" + config.port)
     })
 }
+
+
+//bugs to fix
+/*
+    1) Message in Next Race page should correspond to session status
+    2) When race is ended, the flag should change to danger (Red), now it is checered
+    3) The lap button for each car has a large tappable area.
+    4) Each car is considered to start its first lap (lap 1) as it passes the lap line for the first time.
+    5) When race is finished, the cars button should still be visible
+    6) The server can be started in developer mode with npm run dev, and the countdown timer then lasts 1 minute instead of 10.
+
+
+    UI fix
+
+    1) The Race Control interface is designed for a mobile phone.
+    2) The Lap-line Tracker is designed for a tablet, and works in both landscape and portrait.
+*/ 

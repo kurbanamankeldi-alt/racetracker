@@ -15,6 +15,7 @@ export function setUpFrontDesk(socket, races, io) {
         races.sessions.push(newSession)
         acknowledge({ok: true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
     })
 
     //remove session
@@ -35,6 +36,7 @@ export function setUpFrontDesk(socket, races, io) {
         }
         acknowledge({ok: true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
 
     })
     
@@ -88,6 +90,7 @@ export function setUpFrontDesk(socket, races, io) {
 
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
 
 
     }) 
@@ -110,6 +113,7 @@ export function setUpFrontDesk(socket, races, io) {
         }
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
         
 
     })
@@ -159,6 +163,7 @@ export function setUpFrontDesk(socket, races, io) {
         }
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
         
 
     })

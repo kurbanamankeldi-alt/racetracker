@@ -34,7 +34,8 @@ export function setUpControl(socket, races, io) {
         races.sessions[sessionInd].status= newStatus
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
-        io.to("public").emit("front-desk:state:public", { sessions: races.sessions })
+        io.to("public").emit("front-desk:state", { sessions: races.sessions })
+
     })
 
     //send start and end button clicks

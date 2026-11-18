@@ -75,7 +75,7 @@
 
 
         //session update
-        socket.on('front-desk:state:public', ({ sessions }) => {
+        socket.on('front-desk:state', ({ sessions }) => {
             const race = selectActiveSession(sessions);
             renderLeaderboard(race);
         });
