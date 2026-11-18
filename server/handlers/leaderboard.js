@@ -13,5 +13,5 @@ export function setUpLeaderBoard(socket, races, io) {
 }
 
 function selectActiveSession(sessions) {
-    return sessions.find(race => race.status === "ongoing")
+    return sessions.find(race => race.status === "ongoing" || race.status === "finishing")
 }

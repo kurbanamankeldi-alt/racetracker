@@ -23,8 +23,8 @@ export function setUpLapline(socket, races, io) {
 
         const activeRace = races.sessions[sessionInd];
 
-        if (activeRace.status !== "ongoing") {
-            console.log("found session is not active")
+        if (activeRace.status !== "ongoing" && activeRace.status !== "finishing") {
+            console.log("Race is ended or not active");
             return;
         }
 
@@ -71,7 +71,7 @@ export function setUpLapline(socket, races, io) {
 }
 
 export function selectActiveSession(races) {
-    return races.find(race => race.status === "ongoing") 
+    return races.find(race => race.status === "ongoing" || race.status === "finishing") 
 }
 
 function toSeconds(time) {

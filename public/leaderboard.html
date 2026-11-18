@@ -94,7 +94,10 @@
             drivers.innerHTML = "";
 
             if (!activeRace) {
+                console.log("session ended")
                 status.innerHTML = "No ongoing race";
+                mins.innerHTML = "10"
+                secs.innerHTML = "00"
                 return;
             }
 
@@ -114,7 +117,6 @@
 
         //update driver
         function updateDriver(list, car) {
-            console.log(car)
             const lapCount = Array.isArray(car.times) ? Math.max(0, car.times.length - 1) : 0;
             const lapTimes = Array.isArray(car.laptime) ? car.laptime : [];
             const fastest = getIndexOfFastestLap(lapTimes);
@@ -211,7 +213,7 @@
 
         //helper
         function selectActiveSession(sessions) {
-            return sessions.find(race => race.status === "ongoing")
+            return sessions.find(race => race.status === "ongoing" || race.status === "finishing")
         }
 
         function formatTime(time) {

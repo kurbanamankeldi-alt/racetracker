@@ -86,31 +86,29 @@
         });
 
         //ended race
-        socket.on('session-ended', (ended) => {
-            if (ended) {
-                mainTracker.classList.add("hidden");
-                activeRace = null;
-                orientation.innerHTML = "";
-                status.innerHTML = "Race session is ended";
-            }
-        });
+        socket.on('countdown:ended', () => {
+            console.log("Race session has ended");
+
+            orientation.innerHTML = "";
+            activeRace = null;
+            mainTracker.classList.add("hidden");
+            status.innerHTML = "Race session is ended";
+        });           
 
         //track flag
         socket.on('race-flag:status', (snapshot) => {
             raceMode.innerHTML = "Race mode: " + snapshot.trackMode;
         });
 
-        //track end of timer
-        socket.on('countdown:ended', () => {
-            orientation.innerHTML = "";
-        });           
 
         //helpers
         function selectActiveSession(sessions) {
-            return sessions.find(race => race.status === "ongoing") 
+            console.log(sessions)
+            return sessions.find(race => race.status === "ongoing" || race.status === "finishing") 
         }
 
         function renderRace(race) {
+            console.log(race)
             activeRace = race;
             orientation.innerHTML = "";
 
