@@ -13,8 +13,7 @@
     <p id="status-board">Not connected</p>
     <div class="leader-board">
         <div class="flag">
-            No flag raised yet
-            <span class="color"></span>
+            <span class="flag-text">No flag raised yet</span>
         </div>
 
         <div class="timer hidden">
@@ -32,155 +31,128 @@
     <script>
 
         //page setup
-        const socket = io({
-            autoConnect: false
-        });
+        const socket = io({autoConnect: false})
+        socket.auth = {interface: "leader-board"}
 
-        socket.auth = {
-            interface: "leader-board"
-        };
-
-        const status = document.getElementById("status-board");
-        const drivers = document.querySelector(".driver-details");
-        const mins = document.querySelector(".mins");
-        const secs = document.querySelector(".secs");
-        const timer = document.querySelector(".timer");
-        const flag = document.querySelector(".flag");
-        let activeRace = null;
+        const status = document.getElementById("status-board")
+        const drivers = document.querySelector(".driver-details")
+        const mins = document.querySelector(".mins")
+        const secs = document.querySelector(".secs")
+        const timer = document.querySelector(".timer")
+        const flag = document.querySelector(".flag")
+        const flagText = document.querySelector(".flag-text")
+        let activeRace = null
 
         //connection
-        socket.connect();
+        socket.connect()
 
         socket.on('connect', () => {
-            status.innerHTML = "Connected";
+            status.innerHTML = "Connected"
 
             // Request initial race state
-            socket.emit('races:get-state');
+            socket.emit('races:get-state')
 
             // Request current countdown
-            socket.emit('countdown:get-state');
+            socket.emit('countdown:get-state')
 
-        });
+        })
 
 
         socket.on('disconnect', () => {
-            status.innerHTML = "Disconnected";
-        });
+            status.innerHTML = "Disconnected"
+        })
 
 
         //initial state
         socket.on('active-session', (race) => {
-            renderLeaderboard(race);
-        });
+            renderLeaderboard(race)
+        })
 
 
         //session update
         socket.on('front-desk:state', ({ sessions }) => {
-            const race = selectActiveSession(sessions);
-            renderLeaderboard(race);
-        });
+            const race = selectActiveSession(sessions)
+            renderLeaderboard(race)
+        })
 
 
         //comming from tracker, laptime added
         socket.on('laptime-added', (race) => {
-            renderLeaderboard(race);
-        });
+            renderLeaderboard(race)
+        })
 
 
         //leaderboard
         function renderLeaderboard(race) {
-            activeRace = race;
+            activeRace = race
 
-            drivers.innerHTML = "";
+            drivers.innerHTML = ""
 
             if (!activeRace) {
-                status.innerHTML = "No ongoing race";
-                return;
+                console.log("session ended")
+                status.innerHTML = "No ongoing race"
+                mins.innerHTML = "10"
+                secs.innerHTML = "00"
+                return
             }
 
             activeRace.entries.forEach((car) => {
-                const list = document.createElement("li");
-                list.id = `car-${car.carNumber}`;
-                list.dataset.laptime = "";
-                drivers.appendChild(list);
-                updateDriver(list, car);
-            });
+                const list = document.createElement("li")
+                list.id = `car-${car.carNumber}`
+                list.dataset.laptime = ""
+                drivers.appendChild(list)
+                updateDriver(list, car)
+            })
 
-            sortBoard();
+            sortBoard()
 
-            status.innerHTML = "Race session: " + activeRace.id;
+            status.innerHTML = "Race session: " + activeRace.id
         }
 
 
         //update driver
         function updateDriver(list, car) {
-            console.log(car)
-            const lapCount = Array.isArray(car.times) ? Math.max(0, car.times.length - 1) : 0;
-            const lapTimes = Array.isArray(car.laptime) ? car.laptime : [];
-            const fastest = getIndexOfFastestLap(lapTimes);
+            const lapCount = Array.isArray(car.times) ? Math.max(0, car.times.length - 1) : 0
+            const lapTimes = Array.isArray(car.laptime) ? car.laptime : []
+            const fastest = car.fastestLap
 
             if (!fastest) {
-                list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | No lap recorded`;
-                list.dataset.laptime = "";
-                return;
+                list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | No lap recorded`
+                list.dataset.laptime = ""
+                return
             }
 
-            const bestLap = lapTimes[fastest.index];
-
-            list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | Best: ${formatTime(bestLap)}`;
-            list.dataset.laptime = fastest.min;
+            list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | Best: ${formatTime(fastest)}`
+            list.dataset.laptime = fastest.sec
         }
-
-        //fastest lap
-        function getIndexOfFastestLap(laptimes) {
-            if (laptimes.length === 0) {
-                return null;
-            }
-
-            let min = Infinity;
-            let index = -1;
-
-            laptimes.forEach((lap, i) => {
-                const totalSeconds = lap.min * 60 + lap.sec;
-                if (totalSeconds < min) {
-                    min = totalSeconds;
-                    index = i;
-                }
-            });
-
-            if (index === -1) return null;
-
-            return {index, min};
-        }
-
 
         //sortboard
         function sortBoard() {
-            const items = Array.from(drivers.children);
+            const items = Array.from(drivers.children)
             items.sort((a, b) => {
-                const aTime = a.dataset.laptime;
-                const bTime = b.dataset.laptime;
+                const aTime = a.dataset.laptime
+                const bTime = b.dataset.laptime
 
                 // if no laptime put to last
-                if (aTime === "" && bTime === "") return 0;
-                if (aTime === "") return 1;
-                if (bTime === "") return -1;
+                if (aTime === "" && bTime === "") return 0
+                if (aTime === "") return 1
+                if (bTime === "") return -1
 
-                return Number(aTime) - Number(bTime);
-            });
+                return Number(aTime) - Number(bTime)
+            })
 
             items.forEach(item => {
-                drivers.appendChild(item);
+                drivers.appendChild(item)
 
-            });
+            })
         }
 
 
         //track countdown
         socket.on('countdown:update', (countdown) => {
-            timer.classList.remove("hidden");
-            mins.innerHTML = String(countdown.min).padStart(2, '0');
-            secs.innerHTML = String(countdown.sec).padStart(2, '0');
+            timer.classList.remove("hidden")
+            mins.innerHTML = String(countdown.min).padStart(2, '0')
+            secs.innerHTML = String(countdown.sec).padStart(2, '0')
         });
 
 
@@ -192,7 +164,8 @@
         //track flag
         socket.on('race-flag:status', (snapshot) => {
             const trackMode = snapshot.trackMode;
-            flag.textContent = trackMode;
+
+            flagText.textContent = trackMode;
             flag.classList.remove("green", "yellow", "red");
 
             if (trackMode === "safe") {
@@ -211,7 +184,7 @@
 
         //helper
         function selectActiveSession(sessions) {
-            return sessions.find(race => race.status === "ongoing")
+            return sessions.find(race => race.status === "ongoing" || race.status === "finishing")
         }
 
         function formatTime(time) {

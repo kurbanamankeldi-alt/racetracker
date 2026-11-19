@@ -10,6 +10,7 @@
      <p id="status-countdown">Not connected</p>    
      <div id="countdown-container">
         <div id="minutes">10</div>
+        <span class="separator">:</span>
         <div id="seconds">00</div>
      </div>
 </body>
@@ -19,53 +20,53 @@
    <script> 
         const socket = io({
             autoConnect: false
-        });
+        })
 
         socket.auth = {
             interface: "race-countdown"
-        };
+        }
 
-        socket.connect();
+        socket.connect()
         
-        const status = document.getElementById("status-countdown");
-        const container = document.getElementById("countdown-container");
+        const status = document.getElementById("status-countdown")
+        const container = document.getElementById("countdown-container")
 
         socket.on('connect', () => {
-            status.innerHTML = "connected";
+            status.innerHTML = "connected"
             // Request the current countdown
-            socket.emit('countdown:get-state');
-        });
+            socket.emit('countdown:get-state')
+        })
 
         socket.on('countdown:update', (countdown) => {
-            displayTime(countdown.min, countdown.sec);
+            displayTime(countdown.min, countdown.sec)
             if (countdown.status === "ready") {
-                status.innerHTML = "Waiting for race to start";
-                container.classList.remove("hide");
+                status.innerHTML = "Waiting for race to start"
+                container.classList.remove("hide")
             }
 
             if (countdown.status === "running") {
-                status.innerHTML = "Race in progress";
-                container.classList.remove("hide");
+                status.innerHTML = "Race in progress"
+                container.classList.remove("hide")
             }
 
             if (countdown.status === "finished") {
-                status.innerHTML = "Race finished";
-                container.classList.remove("hide");
+                status.innerHTML = "Race finished"
+                container.classList.remove("hide")
             }
 
             if (countdown.status === "ended") {
-                status.innerHTML = "Race session ended";
-                container.classList.add("hide");
+                status.innerHTML = "Race session ended"
+                container.classList.add("hide")
             }            
-        });
+        })
 
         socket.on('countdown:ended', () => {
-            status.innerHTML = "Race finished";
-        });
+            status.innerHTML = "Race finished"
+        })
 
         function displayTime(min, sec) {
-            document.getElementById("minutes").innerHTML = String(min).padStart(2, '0');
-            document.getElementById("seconds").innerHTML = String(sec).padStart(2, '0');
+            document.getElementById("minutes").innerHTML = String(min).padStart(2, '0')
+            document.getElementById("seconds").innerHTML = String(sec).padStart(2, '0')
         }    
 
    </script>

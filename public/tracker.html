@@ -85,37 +85,31 @@
             renderRace(race);
         });
 
-        //ended race
-        socket.on('session-ended', (ended) => {
-            if (ended) {
-                mainTracker.classList.add("hidden");
-                activeRace = null;
-                orientation.innerHTML = "";
-                status.innerHTML = "Race session is ended";
-            }
-        });
+        //race finished
+        socket.on('countdown:ended', () => {
+            status.innerHTML = "Race finished - waiting for cars to return";
+        });           
 
         //track flag
         socket.on('race-flag:status', (snapshot) => {
             raceMode.innerHTML = "Race mode: " + snapshot.trackMode;
         });
 
-        //track end of timer
-        socket.on('countdown:ended', () => {
-            orientation.innerHTML = "";
-        });           
 
         //helpers
         function selectActiveSession(sessions) {
-            return sessions.find(race => race.status === "ongoing") 
+            console.log(sessions)
+            return sessions.find(race => race.status === "ongoing" || race.status === "finishing") 
         }
 
         function renderRace(race) {
+            console.log(race)
             activeRace = race;
             orientation.innerHTML = "";
 
             if (!activeRace) {
                 status.innerHTML = "No ongoing race";
+                mainTracker.classList.add('hidden');
                 return;
             }
 
@@ -138,5 +132,19 @@
                 carNumber: carNumber});
         }     
            
+
+        //ui
+        function handleOrientationChange() {
+            const isPortrait = window.matchMedia(
+                "(orientation: portrait)"
+            ).matches;
+
+            orientation.classList.toggle("portrait", isPortrait);
+            orientation.classList.toggle("landscape", !isPortrait);
+        }
+
+        window.addEventListener("resize", handleOrientationChange);
+
+        handleOrientationChange();      
    </script>
 </html>

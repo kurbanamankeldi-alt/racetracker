@@ -1,85 +1,92 @@
-import { getCountdownState } from "./countdown.js";
+import { getCountdownState } from "./countdown.js"
 
 export function setUpLapline(socket, races, io) {
 
     // Initial state request
     socket.on('races:get-state', () => {
-        const activeRace = selectActiveSession(races.sessions);
-        socket.emit('race-ongoing', activeRace);
-    });
+        const activeRace = selectActiveSession(races.sessions)
+        socket.emit('race-ongoing', activeRace)
+    })
 
     // Receive lap-time request
     socket.on('laptime:add', (data) => {
-        const { sessionId, carNumber } = data;
+        const { sessionId, carNumber } = data
 
         const sessionInd = races.sessions.findIndex(
             race => race.id === sessionId
-        );
+        )
 
         if (sessionInd === -1) {
             console.log("session not found")
-            return;
+            return
         }
 
-        const activeRace = races.sessions[sessionInd];
+        const activeRace = races.sessions[sessionInd]
 
-        if (activeRace.status !== "ongoing") {
-            console.log("found session is not active")
-            return;
+        if (activeRace.status !== "ongoing" && activeRace.status !== "finishing") {
+            console.log("Race is ended or not active")
+            return
         }
 
         // Find car
         const carObj = activeRace.entries.find(
             entry => entry.carNumber === carNumber
-        );
+        )
 
         if (!carObj) {
             console.log("no car obj found")
-            return;
+            return
         }
 
         // Get countdown state
-        const currentTime = getCountdownState();
+        const currentTime = getCountdownState()
 
-        //add properties to carobj to calculate the lap time
-        if (!carObj.times) {
-            carObj.times = [{ min: 10, sec: 0 }];
-        }
+        if (!carObj.times) carObj.times = []
+        if (!carObj.laptime) carObj.laptime = []
 
-        if (!carObj.laptime) {
-            carObj.laptime = [];
-        }
-        carObj.times.push(currentTime);
+        //crossing
+        carObj.times.push(currentTime)
      
+        //current lap
+        carObj.laps = carObj.times.length
 
-        for (let i = 1; i < carObj.times.length; i++) {
-            carObj.laptime.push(getLapTime(carObj.times[i - 1],carObj.times[i]));
+        //calculation after the first time crossing
+        if (carObj.times.length > 1) {
+            const previousTime = carObj.times[carObj.times.length - 2]
+            const lapTime = getLapTime(previousTime,currentTime)
+            carObj.laptime.push(lapTime)
+
+            const lapSeconds = toSeconds(lapTime)
+
+            if (!carObj.fastestLap || lapSeconds < toSeconds(carObj.fastestLap)) {
+                carObj.fastestLap = lapTime
+            }            
         }
 
         //laptime added broadcast
-        io.to('public').emit('laptime-added', activeRace);
+        io.to('public').emit('laptime-added', activeRace)
         
-        console.log(`Lap recorded: Car ${carNumber}, Session ${activeRace.id}`);
+        console.log(`Lap recorded: Car ${carNumber}, Session ${activeRace.id}`)
 
-    });
+    })
 
     // Initial flag state
     socket.emit('race-flag:status', {
         trackMode: races.trackMode
-    });
+    })
 
 }
 
 export function selectActiveSession(races) {
-    return races.find(race => race.status === "ongoing") 
+    return races.find(race => race.status === "ongoing" || race.status === "finishing") 
 }
 
 function toSeconds(time) {
-    return time.min * 60 + time.sec;
+    return time.min * 60 + time.sec
 }
 
 function getLapTime(previous, current) {
-    const difference = toSeconds(previous) - toSeconds(current);
+    const difference = toSeconds(previous) - toSeconds(current)
 
     return {
         min: Math.floor(difference / 60),

@@ -1,3 +1,73 @@
 .hide{
     display: none;
 }
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    color: #0f172a;
+    font-family: system-ui, sans-serif;
+}
+
+.separator {
+    margin-top: -8px;
+}
+
+/* Connection status */
+#status-countdown {
+    width: calc(100% - 2rem);
+    max-width: 640px;
+    margin: 0 auto 16px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Countdown card */
+#countdown-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    width: calc(100% - 2rem);
+    max-width: 640px;
+    padding: 40px 20px;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: white;
+
+    color: #0f172a;
+    font-size: clamp(64px, 15vw, 110px);
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 3px;
+}
+
+/* Hidden state */
+.hide {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    #countdown-container {
+        padding: 30px 12px;
+        gap: 8px;
+    }
+}

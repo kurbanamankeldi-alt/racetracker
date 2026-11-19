@@ -1,6 +1,7 @@
-import { raceEvents } from "../events.js";
+import { raceEvents } from "../events.js"
 
-let countdownInterval;
+let countdownInterval
+let initialMinutes = 10
 
 let countdown = {
     min: 10,
@@ -9,79 +10,87 @@ let countdown = {
 };
 
 export function getCountdownState() {
-    return { ...countdown };
+    return { ...countdown }
 }
 
-export function initializeCountDown(io) {
+export function initializeCountDown(io, configSpec) {
+
+    initialMinutes = configSpec / 60000;
+
+    countdown = {
+        min: initialMinutes,
+        sec: 0,
+        status: "ready"
+    }
 
     raceEvents.on("race:start", () => {
         console.log("Countdown: race started");
-        stopCountDown();
-
+        stopCountDown()
+        
         countdown = {
-            min: 10,
+            min: initialMinutes,
             sec: 0,
             status: "running"
-        };
-
-        io.emit("countdown:update", countdown);
-        startCountDown(io);
-    });
+        }        
+        
+        io.emit("countdown:update", countdown)
+        startCountDown(io)
+    })
 
     raceEvents.on("race:finish", () => {
-        console.log("Countdown: race finished");
-        stopCountDown();
-        countdown.status = "finished";
-        io.emit("countdown:update", countdown);        
-    });    
+        console.log("Countdown: race finished")
+        stopCountDown()
+        countdown.status = "finished"
+        io.emit("countdown:update", countdown)        
+    })    
 
     raceEvents.on("race:end", () => {
-        console.log("Countdown: race ended");
-        stopCountDown();
-        countdown.status = "ended";
-        io.emit("countdown:update", countdown);        
-    });
+        console.log("Countdown: race ended")
+        stopCountDown()
+        countdown.status = "ended"
+        io.emit("countdown:update", countdown)        
+    })
     
 }
 
 export function setUpCountDown(socket, races, io) {
     socket.on('countdown:get-state', () => {
-        socket.emit('countdown:update', getCountdownState());
-    });
+        socket.emit('countdown:update', getCountdownState())
+    })
 }
 
 function startCountDown(io) {
-        if (countdownInterval) return;
+        if (countdownInterval) return
 
         countdownInterval = setInterval(() => {
 
             if (countdown.min === 0 && countdown.sec === 0) {
-                stopCountDown();
-                countdown.status = "finished";
-                io.emit("countdown:update", countdown);
-                io.emit("countdown:ended");  
+                stopCountDown()
+                countdown.status = "finished"
+                io.emit("countdown:update", countdown)
+                io.emit("countdown:ended")  
                 //notify server
-                raceEvents.emit("countdown:expired");              
-                return;
+                raceEvents.emit("countdown:expired")              
+                return
             }
 
             if (countdown.sec === 0) {
-                countdown.min--;
-                countdown.sec = 59;
+                countdown.min--
+                countdown.sec = 59
             } else {
-                countdown.sec--;
+                countdown.sec--
             }
 
-            io.emit('countdown:update', countdown);
+            io.emit('countdown:update', countdown)
 
-        }, 1000);    
+        }, 1000)    
 }
 
 function stopCountDown() {
-    clearInterval(countdownInterval);
-    countdownInterval = null;    
+    clearInterval(countdownInterval)
+    countdownInterval = null    
 }
 
 export function selectActiveSession(races) {
-    return races.find((race) => race.status === "ongoing");
+    return races.find((race) => race.status === "ongoing")
 }
