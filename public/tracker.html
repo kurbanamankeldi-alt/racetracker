@@ -109,6 +109,7 @@
 
             if (!activeRace) {
                 status.innerHTML = "No ongoing race";
+                mainTracker.classList.add('hidden');
                 return;
             }
 
@@ -131,5 +132,19 @@
                 carNumber: carNumber});
         }     
            
+
+        //ui
+        function handleOrientationChange() {
+            const isPortrait = window.matchMedia(
+                "(orientation: portrait)"
+            ).matches;
+
+            orientation.classList.toggle("portrait", isPortrait);
+            orientation.classList.toggle("landscape", !isPortrait);
+        }
+
+        window.addEventListener("resize", handleOrientationChange);
+
+        handleOrientationChange();      
    </script>
 </html>
