@@ -84,7 +84,9 @@ if (config) {
             setUpCountDown(socket, races, io)
             setUpLeaderBoard(socket, races, io)
             setUpNextRace(socket, races, io)
-        }        
+        }
+        //save state
+        socket        
     })
 
     server.listen(config.port, () => {

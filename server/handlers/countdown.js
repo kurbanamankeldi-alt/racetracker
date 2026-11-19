@@ -23,6 +23,7 @@ export function initializeCountDown(io, configSpec) {
         status: "ready"
     }
 
+
     raceEvents.on("race:start", () => {
         console.log("Countdown: race started");
         stopCountDown()
