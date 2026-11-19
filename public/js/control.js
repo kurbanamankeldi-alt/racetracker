@@ -86,14 +86,18 @@ newFlag.textContent= `Current Flag: ${trackMode}`
 //current session
 socket.on("front-desk:state", ({ sessions }) => {
     currentSession = sessions.find(session => session.status!="ended" && session.entries.length!=0)
-    endbutton.hiddend = true
-    safeBtn.hiddend= true
-    hazardBtn.hiddend= true
-    dangerBtn.hiddend = true
+    endbutton.hidden = true
+    safeBtn.hidden= true
+    hazardBtn.hidden= true
+    dangerBtn.hidden = true
 
     if (!currentSession) {
-        document.getElementById("current-session").textContent="No Active Sessions"
+        
+        document.getElementById("no-active").textContent="No Active Sessions"
+        document.getElementById("current-session").replaceChildren()
         return
+    } else {
+        document.getElementById("no-active").textContent=""
     }
 
 

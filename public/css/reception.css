@@ -2,6 +2,8 @@
     display: none;
 }
 
+
+
 .session-card {
     box-sizing: border-box; /* Include padding and borders in the card's width. */
     width: calc(100% - 2rem); /* Reserve 2rem of horizontal space, 1rem per side when centered. */
@@ -233,6 +235,18 @@ body {
     font-weight: 600;
 }
 
-#login {
-    text-align: center;
+
+
+.password:not(.hidden) {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 60px;
+}
+
+.password:not(.hidden) input,
+.password:not(.hidden) button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
