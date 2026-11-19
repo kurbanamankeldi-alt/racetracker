@@ -51,11 +51,10 @@ socket.on("disconnect", () => {
 endbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ended"}, showResponse)
     socket.emit('end-clicked')
+    socket.emit("race-flag:change", {trackMode: "danger"}, showResponse)
 })
 startbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ongoing"},showResponse)
-    //start timer
-    //socket.emit("countdown-started")
     //change flag
     socket.emit("race-flag:change", {trackMode: "safe"}, showResponse)
     socket.emit('start-clicked')
@@ -64,8 +63,7 @@ startbutton.addEventListener("click", e=>{
 finishbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "finishing"},showResponse)
     socket.emit("race-flag:change", {trackMode: "danger"}, showResponse)
-    //stop timer
-    //socket.emit("")
+
 })
 
 //track mode control

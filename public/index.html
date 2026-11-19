@@ -2,66 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Socket.IO Test</title>
+    <title>The Racetracker</title>
 </head>
 <body>
-    <h1>Backend Test</h1>
-    <form id="login">
-        <input id="key" type="password" placeholder="Receptionist key" required>
-        <button>Connect</button>
-    </form>
-    <p id="status">Not connected</p>
-    <button id="test" disabled>Test</button>
-    <pre id="sessions"></pre>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io({ autoConnect: false })
-        const status = document.getElementById("status")
-        const testButton = document.getElementById("test")
-
-        document.getElementById("login").addEventListener("submit", (event) => {
-            event.preventDefault()
-            socket.auth = {
-                interface: "front-desk",
-                accessKey: document.getElementById("key").value
-            }
-            socket.connect()
-        })
-
-        socket.on("server:welcome", (message) => {
-            console.log(message)
-        })
-
-        socket.on("connect_error", (error) => {
-            status.textContent = error.data?.code ?? error.message
-            testButton.disabled = true
-        })
-
-        socket.on("disconnect", () => {
-            status.textContent = "Disconnected"
-            testButton.disabled = true
-        })
-
-        socket.on("front-desk:state", (snapshot) => {
-            status.textContent = "Authenticated"
-            testButton.disabled = false
-            document.getElementById("sessions").textContent =
-                JSON.stringify(snapshot.sessions, null, 2)
-        })
-
-        function showResponse(response) {
-            console.log(response)
-        }
-
-        testButton.addEventListener("click", () => {
-            // Keep one example active at a time.
-            socket.emit("session:create", {}, showResponse)
-            // socket.emit("session:remove", { sessionId: 2 }, showResponse)
-            // socket.emit("driver:add", { sessionId: 1, name: "Max" }, showResponse)
-            // socket.emit("driver:edit", { sessionId: 1, name: "Alice", newName: "Max" }, showResponse)
-            // socket.emit("driver:remove", { sessionId: 1, name: "Bob" }, showResponse)
-        })
-    </script>
+    <div class="header-row">
+    <h1>Home</h1>
+    </div>
+    <nav>
+    <ul>
+        <li><a href="/front-desk">Front Desk</a></li>
+        <li><a href="/race-control">Race Control</a></li>
+        <li><a href="/lap-line-tracker">Lap-line Tracker</a></li>
+        <li><a href="/leader-board">Leader Board</a></li>
+        <li><a href="/next-race">Next Race</a></li>
+        <li><a href="/race-countdown">Race Countdown</a></li>
+        <li><a href="/race-flags">Race Flags</a></li>
+    </ul>
+</nav>
 </body>
 </html>
