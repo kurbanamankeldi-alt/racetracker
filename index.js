@@ -103,8 +103,8 @@ if (config) {
 
     UI fix
 
-    1) The Lap-line Tracker is designed for a tablet, and works in both landscape and portrait.
-    2) The lap button for each car has a large tappable area.    
+    1) The Lap-line Tracker is designed for a tablet, and works in both landscape and portrait. (fixed)
+    2) The lap button for each car has a large tappable area. (fixed)    
 
     Xinyu
 

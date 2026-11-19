@@ -13,8 +13,7 @@
     <p id="status-board">Not connected</p>
     <div class="leader-board">
         <div class="flag">
-            No flag raised yet
-            <span class="color"></span>
+            <span class="flag-text">No flag raised yet</span>
         </div>
 
         <div class="timer hidden">
@@ -41,6 +40,7 @@
         const secs = document.querySelector(".secs")
         const timer = document.querySelector(".timer")
         const flag = document.querySelector(".flag")
+        const flagText = document.querySelector(".flag-text")
         let activeRace = null
 
         //connection
@@ -123,7 +123,7 @@
             }
 
             list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | Best: ${formatTime(fastest)}`
-            list.dataset.laptime = fastest.min
+            list.dataset.laptime = fastest.sec
         }
 
         //sortboard
@@ -164,7 +164,8 @@
         //track flag
         socket.on('race-flag:status', (snapshot) => {
             const trackMode = snapshot.trackMode;
-            flag.textContent = trackMode;
+
+            flagText.textContent = trackMode;
             flag.classList.remove("green", "yellow", "red");
 
             if (trackMode === "safe") {
