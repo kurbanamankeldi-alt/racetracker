@@ -41,19 +41,26 @@ export function setUpLapline(socket, races, io) {
         // Get countdown state
         const currentTime = getCountdownState();
 
-        //add properties to carobj to calculate the lap time
-        if (!carObj.times) {
-            carObj.times = [{ min: 10, sec: 0 }];
-        }
+        if (!carObj.times) carObj.times = [];
+        if (!carObj.laptime) carObj.laptime = [];
 
-        if (!carObj.laptime) {
-            carObj.laptime = [];
-        }
+        //crossing
         carObj.times.push(currentTime);
      
+        //current lap
+        carObj.laps = carObj.times.length;
 
-        for (let i = 1; i < carObj.times.length; i++) {
-            carObj.laptime.push(getLapTime(carObj.times[i - 1],carObj.times[i]));
+        //calculation after the first time crossing
+        if (carObj.times.length > 1) {
+            const previousTime = carObj.times[carObj.times.length - 2];
+            const lapTime = getLapTime(previousTime,currentTime);
+            carObj.laptime.push(lapTime);
+
+            const lapSeconds = toSeconds(lapTime);
+
+            if (!carObj.fastestLap || lapSeconds < toSeconds(carObj.fastestLap)) {
+                carObj.fastestLap = lapTime;
+            }            
         }
 
         //laptime added broadcast

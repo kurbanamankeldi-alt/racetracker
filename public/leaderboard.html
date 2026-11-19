@@ -119,7 +119,7 @@
         function updateDriver(list, car) {
             const lapCount = Array.isArray(car.times) ? Math.max(0, car.times.length - 1) : 0;
             const lapTimes = Array.isArray(car.laptime) ? car.laptime : [];
-            const fastest = getIndexOfFastestLap(lapTimes);
+            const fastest = car.fastestLap
 
             if (!fastest) {
                 list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | No lap recorded`;
@@ -127,34 +127,9 @@
                 return;
             }
 
-            const bestLap = lapTimes[fastest.index];
-
-            list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | Best: ${formatTime(bestLap)}`;
+            list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | Best: ${formatTime(fastest)}`;
             list.dataset.laptime = fastest.min;
         }
-
-        //fastest lap
-        function getIndexOfFastestLap(laptimes) {
-            if (laptimes.length === 0) {
-                return null;
-            }
-
-            let min = Infinity;
-            let index = -1;
-
-            laptimes.forEach((lap, i) => {
-                const totalSeconds = lap.min * 60 + lap.sec;
-                if (totalSeconds < min) {
-                    min = totalSeconds;
-                    index = i;
-                }
-            });
-
-            if (index === -1) return null;
-
-            return {index, min};
-        }
-
 
         //sortboard
         function sortBoard() {
