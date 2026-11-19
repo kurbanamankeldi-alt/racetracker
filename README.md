@@ -339,3 +339,9 @@ This is currently a development plan. Once implementation decisions exist, add:
 - Known limitations and any completed extras.
 
 Deliver all source and configuration files with the final root README. During review, both developers must be ready to demonstrate the application, explain design choices, and discuss challenges and solutions.
+
+## AI Addition: Clearer Racetrack Interfaces
+
+This UI addition groups the homepage links for staff and visitors, labels assigned cars on Next Race, and separates driver, car, laps, and best time on the Leaderboard. Larger sign-in buttons and clearer prompts make Front Desk and Race Control easier to use on a phone.
+
+Run `npm start` to see the addition or `npm start -- --no-ai` to use the base UI.

@@ -87,7 +87,9 @@
             raceData.entries.forEach((driver) => {
                 const item = document.createElement("li")
                 item.classList.add("car-details")
-                item.textContent = `${driver.name} ${driver.carNumber}`
+                // ===== AI Extension: Begin =====
+                item.textContent = window.racetrackUI?.driverLabel(driver.name, driver.carNumber) ?? `${driver.name} ${driver.carNumber}`
+                // ===== AI Extension: End =====
                 list.appendChild(item)
             })
         }

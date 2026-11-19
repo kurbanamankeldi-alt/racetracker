@@ -116,6 +116,14 @@
             const lapTimes = Array.isArray(car.laptime) ? car.laptime : []
             const fastest = car.fastestLap
 
+            // ===== AI Extension: Begin =====
+            if (window.racetrackUI) {
+                window.racetrackUI.renderResult(list, car.name, car.carNumber, lapCount, fastest ? formatTime(fastest) : null)
+                list.dataset.laptime = fastest ? fastest.sec : ""
+                return
+            }
+            // ===== AI Extension: End =====
+
             if (!fastest) {
                 list.textContent = `${car.name}: ${car.carNumber} | ${lapCount} laps | No lap recorded`
                 list.dataset.laptime = ""

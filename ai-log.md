@@ -33,3 +33,5 @@
 ## AI Addition
 
 I will record the addition separately as it progresses, including the user need, what I delegated, what I tested, where AI output needed revision, and what I could verify independently.
+
+| UI addition | Xinyu chose the UI improvements and approved AI implementation of the optional presentation layer and startup toggle. | The extension can change how the same race data is presented while the base pages remain available. |

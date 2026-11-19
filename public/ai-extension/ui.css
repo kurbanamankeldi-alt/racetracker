@@ -1,0 +1,39 @@
+/* ===== AI Extension: Begin ===== */
+body:has(.ai-home) {
+    margin: 0 auto;
+    padding: 24px 16px;
+    max-width: 760px;
+    font-family: system-ui, sans-serif;
+    color: #0f172a;
+    background: #f8fafc;
+}
+
+.ai-home {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 16px;
+}
+
+.ai-home section {
+    padding: 16px;
+    border: 1px solid #dbe3ee;
+    border-radius: 10px;
+    background: white;
+}
+
+.ai-home h2 { margin: 0 0 8px; font-size: 1.15rem; }
+.ai-home ul { margin: 0; padding: 0; list-style: none; }
+.ai-home a { display: block; padding: 10px 4px; color: #1d4ed8; }
+
+.ai-login button { min-height: 44px; padding: 8px 14px; }
+.connection-status { font-size: .8rem; font-weight: 500; opacity: .8; }
+
+li.ai-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    overflow-wrap: anywhere;
+}
+
+.ai-result strong:last-child { text-align: right; }
+/* ===== AI Extension: End ===== */
