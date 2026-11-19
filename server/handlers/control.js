@@ -15,7 +15,7 @@ export function setUpControl(socket, races, io) {
         races.trackMode = trackMode    
         
         if (trackMode === "finish") {
-            raceEvents.emit("race:finish");  
+            raceEvents.emit("race:finish")
         }
          
 
@@ -52,21 +52,22 @@ export function setUpControl(socket, races, io) {
 export function initializeRaceControl(races, io) {
 
     raceEvents.on("countdown:expired", () => {
-        console.log("Countdown expired");
-
+        console.log("Countdown expired")
         finishRace(races, io);
     });
 }
 
 // finish logic
 export function finishRace(races, io) {
-    if (races.trackMode === "finish") return;
+    const activeRace = races.sessions.find(race => race.status === "ongoing")
 
-    races.trackMode = "finish";
+    if (!activeRace) return
 
-    raceEvents.emit("race:finish");
+    activeRace.status = "finishing"
+    races.trackMode = "finish"
 
-    io.to("public").emit("race-flag:status", {
-        trackMode: races.trackMode
-    });
+    raceEvents.emit("race:finish")
+
+    io.to("public").emit("race-flag:status", {trackMode: races.trackMode})
+    io.to("public").emit("front-desk:state", {sessions: races.sessions})
 }

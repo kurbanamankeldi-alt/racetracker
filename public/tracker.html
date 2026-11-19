@@ -85,14 +85,9 @@
             renderRace(race);
         });
 
-        //ended race
+        //race finished
         socket.on('countdown:ended', () => {
-            console.log("Race session has ended");
-
-            orientation.innerHTML = "";
-            activeRace = null;
-            mainTracker.classList.add("hidden");
-            status.innerHTML = "Race session is ended";
+            status.innerHTML = "Race finished - waiting for cars to return";
         });           
 
         //track flag

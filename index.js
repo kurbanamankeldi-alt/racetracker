@@ -58,7 +58,7 @@ if (config) {
 
     const io = new Server(server)
     setUpAuth(io, config)
-    initializeCountDown(io);   
+    initializeCountDown(io, config.raceDurationMs);   
     initializeRaceControl(races, io)   
 
     io.on("connection", (socket) => {
@@ -98,7 +98,7 @@ if (config) {
     1) Message in Next Race page should correspond to session status
     4) Each car is considered to start its first lap (lap 1) as it passes the lap line for the first time.(fixed)
     5) When race is finished, the cars button should still be visible (fixed)
-    6) The server can be started in developer mode with npm run dev, and the countdown timer then lasts 1 minute instead of 10.
+    6) The server can be started in developer mode with npm run dev, and the countdown timer then lasts 1 minute instead of 10. (fixed)
 
 
     UI fix

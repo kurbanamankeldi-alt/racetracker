@@ -19,63 +19,57 @@
     <script>
 
         //page setup
+        const socket = io({autoConnect: false})
+        socket.auth = {interface: "next-race"}
 
-        const socket = io({
-            autoConnect: false
-        });
-
-        socket.auth = {
-            interface: "next-race"
-        };
-
-        const status = document.querySelector(".connection-status");
-        const message = document.querySelector(".message");
-        const list = document.querySelector(".current-race-details");
+        const status = document.querySelector(".connection-status")
+        const message = document.querySelector(".message")
+        const list = document.querySelector(".current-race-details")
 
 
         //connection
-        socket.connect();
+        socket.connect()
         socket.on('connect', () => {
-            status.innerHTML = "Connected";
+            status.innerHTML = "Connected"
             // Request current upcoming race
-            socket.emit('nextrace:get-state');
-        });
+            socket.emit('nextrace:get-state')
+        })
 
         socket.on('disconnect', () => {
-            status.innerHTML = "Disconnected";
-        });
+            status.innerHTML = "Disconnected"
+        })
 
 
         //initial setup
         socket.on('upcoming-race', (upcomingRace) => {
-            updatePage(upcomingRace, "Please Proceed to Paddock");
-        });
+            updatePage(upcomingRace, "Please Proceed to Paddock")
+        })
 
 
         //track sessions
         socket.on('front-desk:state', ({ sessions }) => {
-            const nextRace = selectUpcomingSession(sessions);
-            updatePage(nextRace, "Next Race");
-        });
+            const nextRace = selectUpcomingSession(sessions)
+            updatePage(nextRace, "Next Race")
+        })
 
 
         //update page
         function updatePage(raceData, heading) {
-            list.innerHTML = "";
+            list.innerHTML = ""
 
             if (!raceData) {
-                message.innerHTML = "No upcoming race";
-                return;
+                message.innerHTML = "No upcoming race"
+                return
             }
 
-            message.innerHTML = heading;
+            message.innerHTML = heading
 
             raceData.entries.forEach((driver) => {
-                const item = document.createElement("li");
-                item.classList.add("car-details");
-                item.textContent = `${driver.name} ${driver.carNumber}`;
-                list.appendChild(item);
-            });
+                const item = document.createElement("li")
+                item.classList.add("car-details")
+                item.textContent = `${driver.name} ${driver.carNumber}`
+                list.appendChild(item)
+            })
         }
 
 
