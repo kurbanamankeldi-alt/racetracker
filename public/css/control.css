@@ -33,6 +33,93 @@
     font-weight: 600;
 }
 
-#login {
+.password:not(.hidden) {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 60px;
+}
+
+.password:not(.hidden) input,
+.password:not(.hidden) button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.session-card {
+    box-sizing: border-box; 
+    width: calc(100% - 2rem);
+    max-width: 640px;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.session-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.driver-table th,
+.driver-table td {
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+#trackMode {
+    box-sizing: border-box; 
+    width: calc(100% - 2rem);
+    max-width: 640px;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+#currentFlag {
+    font-size: 18px;
+}
+
+#trackMode button {
+    font-size: 24px;
+    padding: 10px 16px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#session-control-btns {
+    width: calc(100% - 2rem);
+    max-width: 640px;
+    margin: 10px auto;
+    padding: 10px;
+
+    display: flex;
+    justify-content: center;
+}
+
+#session-control-btns button {
+    
+    font-size: 24px;
+    padding: 10px 16px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#no-active {
+    font-size: 18px;
     text-align: center;
+    font-weight: bold;
+    margin: 10px;
+    color: rgb(225, 114, 114)
+
+
+
 }

@@ -1,6 +1,7 @@
 
 import { getSessionIdxBySessionId} from "./reception.js"
 import { raceEvents } from "../events.js";
+import { saveState } from "../state.js"
 
 export function setUpControl(socket, races, io) {
     //send initial flag
@@ -22,6 +23,7 @@ export function setUpControl(socket, races, io) {
         acknowledge({ok:true})
         console.log("new flag:", races.trackMode)
         io.to("public").emit("race-flag:status", {trackMode: races.trackMode})
+        saveState()
     })
 
     //listen change of session status
@@ -35,6 +37,7 @@ export function setUpControl(socket, races, io) {
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
         io.to("public").emit("front-desk:state", { sessions: races.sessions })
+        saveState()
 
     })
 
@@ -69,5 +72,6 @@ export function finishRace(races, io) {
     raceEvents.emit("race:finish")
 
     io.to("public").emit("race-flag:status", {trackMode: races.trackMode})
-    io.to("public").emit("front-desk:state", {sessions: races.sessions})
+    io.to("public").to("staff").emit("front-desk:state", {sessions: races.sessions})
+    saveState()
 }

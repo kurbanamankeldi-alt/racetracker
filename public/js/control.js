@@ -51,11 +51,10 @@ socket.on("disconnect", () => {
 endbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ended"}, showResponse)
     socket.emit('end-clicked')
+    socket.emit("race-flag:change", {trackMode: "danger"}, showResponse)
 })
 startbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "ongoing"},showResponse)
-    //start timer
-    //socket.emit("countdown-started")
     //change flag
     socket.emit("race-flag:change", {trackMode: "safe"}, showResponse)
     socket.emit('start-clicked')
@@ -64,8 +63,7 @@ startbutton.addEventListener("click", e=>{
 finishbutton.addEventListener("click", e=>{
     socket.emit("session-status:change", {sessionId: currentSession.id, newStatus: "finishing"},showResponse)
     socket.emit("race-flag:change", {trackMode: "danger"}, showResponse)
-    //stop timer
-    //socket.emit("")
+
 })
 
 //track mode control
@@ -88,14 +86,18 @@ newFlag.textContent= `Current Flag: ${trackMode}`
 //current session
 socket.on("front-desk:state", ({ sessions }) => {
     currentSession = sessions.find(session => session.status!="ended" && session.entries.length!=0)
-    endbutton.hiddend = true
-    safeBtn.hiddend= true
-    hazardBtn.hiddend= true
-    dangerBtn.hiddend = true
+    endbutton.hidden = true
+    safeBtn.hidden= true
+    hazardBtn.hidden= true
+    dangerBtn.hidden = true
 
     if (!currentSession) {
-        document.getElementById("current-session").textContent="No Active Sessions"
+        
+        document.getElementById("no-active").textContent="No Active Sessions"
+        document.getElementById("current-session").replaceChildren()
         return
+    } else {
+        document.getElementById("no-active").textContent=""
     }
 
 

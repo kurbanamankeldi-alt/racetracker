@@ -35,6 +35,14 @@ if (config) {
         "/js/control.js": ["./public/js/control.js", "text/javascript"],
     }
 
+    // ===== AI Extension: Begin =====
+    const aiPages = new Set(["/", "/front-desk", "/race-control", "/leader-board", "/next-race"])
+    if (config.aiExtensionEnabled) {
+        routes["/ai-extension/ui.css"] = ["./public/ai-extension/ui.css", "text/css"]
+        routes["/ai-extension/ui.js"] = ["./public/ai-extension/ui.js", "text/javascript"]
+    }
+    // ===== AI Extension: End =====
+
     const server = createServer(async (req, res) => {
         const pathname = new URL(req.url, "http://localhost").pathname
         const route = routes[pathname]
@@ -48,6 +56,13 @@ if (config) {
             const [filePath, contentType] = route
             const content = await readFile(new URL(filePath, import.meta.url))
             res.writeHead(200, { "Content-Type": contentType + "; charset=utf-8" })
+            // ===== AI Extension: Begin =====
+            if (config.aiExtensionEnabled && aiPages.has(pathname)) {
+                const assets = '<link rel="stylesheet" href="/ai-extension/ui.css">\n<script src="/ai-extension/ui.js"></script>\n'
+                res.end(content.toString("utf8").replace("</head>", assets + "</head>"))
+                return
+            }
+            // ===== AI Extension: End =====
             res.end(content)
         } catch (error) {
             console.error(error)
@@ -84,7 +99,9 @@ if (config) {
             setUpCountDown(socket, races, io)
             setUpLeaderBoard(socket, races, io)
             setUpNextRace(socket, races, io)
-        }        
+        }
+        //save state
+        socket        
     })
 
     server.listen(config.port, () => {

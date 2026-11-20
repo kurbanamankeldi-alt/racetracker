@@ -1,4 +1,5 @@
  const carAll= [1,2,3,4,5,6,7,8]
+ import { saveState } from "../state.js"
 export function setUpFrontDesk(socket, races, io) {
 
     
@@ -16,6 +17,8 @@ export function setUpFrontDesk(socket, races, io) {
         acknowledge({ok: true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
         io.to("public").emit("front-desk:state", { sessions: races.sessions })
+        saveState()
+        
     })
 
     //remove session
@@ -37,6 +40,7 @@ export function setUpFrontDesk(socket, races, io) {
         acknowledge({ok: true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
         io.to("public").emit("front-desk:state", { sessions: races.sessions })
+        saveState()
 
     })
     
@@ -91,6 +95,7 @@ export function setUpFrontDesk(socket, races, io) {
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
         io.to("public").emit("front-desk:state", { sessions: races.sessions })
+        saveState()
 
 
     }) 
@@ -114,6 +119,7 @@ export function setUpFrontDesk(socket, races, io) {
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
         io.to("public").emit("front-desk:state", { sessions: races.sessions })
+        saveState()
         
 
     })
@@ -164,6 +170,7 @@ export function setUpFrontDesk(socket, races, io) {
         acknowledge({ok:true})
         io.to("staff").emit("front-desk:state", { sessions: races.sessions })
         io.to("public").emit("front-desk:state", { sessions: races.sessions })
+        saveState()
         
 
     })

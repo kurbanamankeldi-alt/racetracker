@@ -22,6 +22,9 @@ export function loadConfig() {
         safetyKey,
         observerKey,
         port: 3000,
+        // ===== AI Extension: Begin =====
+        aiExtensionEnabled: !process.argv.includes("--no-ai"),
+        // ===== AI Extension: End =====
         raceDurationMs: process.argv.includes("--dev") ? 60_000 : 600_000,
     }
 }

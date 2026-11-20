@@ -1,4 +1,5 @@
 import { getCountdownState } from "./countdown.js"
+import { saveState } from "../state.js"
 
 export function setUpLapline(socket, races, io) {
 
@@ -67,6 +68,7 @@ export function setUpLapline(socket, races, io) {
         io.to('public').emit('laptime-added', activeRace)
         
         console.log(`Lap recorded: Car ${carNumber}, Session ${activeRace.id}`)
+        saveState()
 
     })
 
