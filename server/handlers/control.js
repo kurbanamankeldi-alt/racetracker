@@ -23,7 +23,7 @@ export function setUpControl(socket, races, io) {
         acknowledge({ok:true})
         console.log("new flag:", races.trackMode)
         io.to("public").emit("race-flag:status", {trackMode: races.trackMode})
-        saveState()
+        setTimeout(()=>{saveState()}, 500);
     })
 
     //listen change of session status
