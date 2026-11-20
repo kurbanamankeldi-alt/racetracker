@@ -1,55 +1,74 @@
 import { raceEvents } from "../events.js"
+import { races, saveState } from "../state.js"
 
 let countdownInterval
 let initialMinutes = 10
 
-let countdown = {
-    min: 10,
-    sec: 0,
-    status: "ready"
-};
 
 export function getCountdownState() {
-    return { ...countdown }
+    return { ...races.countdown }
 }
 
 export function initializeCountDown(io, configSpec) {
 
     initialMinutes = configSpec / 60000;
 
-    countdown = {
-        min: initialMinutes,
-        sec: 0,
-        status: "ready"
+    // Check if a race was ongoing before server restart
+    const activeRace = selectActiveSession(races.sessions);
+
+    if (activeRace && races.countdown?.status === "running") {
+        startCountDown(io)
+        io.emit("countdown:update", races.countdown)
+    } else if (activeRace) {
+        races.countdown = {
+            min: initialMinutes,
+            sec: 0,
+            status: "running"
+        }
+
+        saveState()
+        io.emit("countdown:update", races.countdown)
+        startCountDown(io)
+    } else {
+        races.countdown = {
+            min: initialMinutes,
+            sec: 0,
+            status: "ready"
+        }
+        saveState()
     }
 
-
+    
     raceEvents.on("race:start", () => {
         console.log("Countdown: race started");
         stopCountDown()
         
-        countdown = {
+        races.countdown = {
             min: initialMinutes,
             sec: 0,
             status: "running"
-        }        
+        }
+
+        saveState()     
         
-        io.emit("countdown:update", countdown)
+        io.emit("countdown:update", races.countdown)
         startCountDown(io)
     })
 
     raceEvents.on("race:finish", () => {
         console.log("Countdown: race finished")
         stopCountDown()
-        countdown.status = "finished"
-        io.emit("countdown:update", countdown)        
+        races.countdown.status = "finished"
+        io.emit("countdown:update", races.countdown)  
+        saveState()     
     })    
 
     raceEvents.on("race:end", () => {
         console.log("Countdown: race ended")
         stopCountDown()
-        countdown.status = "ended"
-        io.emit("countdown:update", countdown)        
+        races.countdown.status = "ended"
+        io.emit("countdown:update", races.countdown)      
+        saveState() 
     })
     
 }
@@ -65,24 +84,26 @@ function startCountDown(io) {
 
         countdownInterval = setInterval(() => {
 
-            if (countdown.min === 0 && countdown.sec === 0) {
+            if (races.countdown.min === 0 && races.countdown.sec === 0) {
                 stopCountDown()
-                countdown.status = "finished"
-                io.emit("countdown:update", countdown)
+                races.countdown.status = "finished";
+                io.emit("countdown:update", races.countdown)
                 io.emit("countdown:ended")  
+                saveState()
                 //notify server
                 raceEvents.emit("countdown:expired")              
                 return
             }
 
-            if (countdown.sec === 0) {
-                countdown.min--
-                countdown.sec = 59
+            if (races.countdown.sec === 0) {
+                races.countdown.min--
+                races.countdown.sec = 59
             } else {
-                countdown.sec--
+                races.countdown.sec--
             }
 
-            io.emit('countdown:update', countdown)
+            io.emit('countdown:update', races.countdown)
+            saveState();
 
         }, 1000)    
 }

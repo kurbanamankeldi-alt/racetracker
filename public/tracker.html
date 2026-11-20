@@ -28,72 +28,72 @@
         //page setup
         const socket = io({
             autoConnect: false
-        });
+        })
 
-        const status = document.getElementById("statusTracker");
-        const orientation = document.querySelector(".orientation");
-        const raceMode = document.querySelector(".race-mode");
-        const mainTracker = document.getElementById("main-tracker");
+        const status = document.getElementById("statusTracker")
+        const orientation = document.querySelector(".orientation")
+        const raceMode = document.querySelector(".race-mode")
+        const mainTracker = document.getElementById("main-tracker")
 
-        let activeRace = null;
+        let activeRace = null
 
         document.getElementById("loginTracker").addEventListener("submit", (event) => {
-                event.preventDefault();
+                event.preventDefault()
                 socket.auth = {
                     interface: "lap-line-tracker",
                     accessKey: document.getElementById("key").value
-                };
-                socket.connect();
-            });
+                }
+                socket.connect()
+            })
 
 
         //connection
 
         socket.on('connect', () => {
-            document.getElementById('loginTracker').classList.add('hidden');
-            mainTracker.classList.remove('hidden');
-            status.innerHTML = "Connected";
+            document.getElementById('loginTracker').classList.add('hidden')
+            mainTracker.classList.remove('hidden')
+            status.innerHTML = "Connected"
 
             //current state
-            socket.emit('races:get-state');
-        });
+            socket.emit('races:get-state')
+        })
 
         socket.on('disconnect', () => {
-            status.innerHTML = "Disconnected";
-        });
+            status.innerHTML = "Disconnected"
+        })
 
         socket.on('connect_error', (error) => {
-            status.innerHTML = "Connection error: " + error.message;
-        });
+            status.innerHTML = "Connection error: " + error.message
+        })
 
 
         //render initial state
         socket.on('race-ongoing', (race) => {
-            renderRace(race);
-        });
+            renderRace(race)
+        })
 
 
         //track session updates
         socket.on('front-desk:state', ({ sessions }) => {
-            const race = selectActiveSession(sessions);
-            renderRace(race);
-        });
+            const race = selectActiveSession(sessions)
+            renderRace(race)
+        })
 
 
         //laptime added
         socket.on('laptime-added', (race) => {
-            renderRace(race);
-        });
+            renderRace(race)
+        })
 
         //race finished
         socket.on('countdown:ended', () => {
-            status.innerHTML = "Race finished - waiting for cars to return";
-        });           
+            status.innerHTML = "Race finished - waiting for cars to return"
+        })           
 
         //track flag
         socket.on('race-flag:status', (snapshot) => {
-            raceMode.innerHTML = "Race mode: " + snapshot.trackMode;
-        });
+            raceMode.innerHTML = "Race mode: " + snapshot.trackMode
+        })
 
 
         //helpers
@@ -104,32 +104,34 @@
 
         function renderRace(race) {
             console.log(race)
-            activeRace = race;
-            orientation.innerHTML = "";
+            activeRace = race
+            orientation.innerHTML = ""
 
             if (!activeRace) {
-                status.innerHTML = "No ongoing race";
-                mainTracker.classList.add('hidden');
-                return;
+                status.innerHTML = "No ongoing race"
+                mainTracker.classList.add('hidden')
+                return
             }
 
-            activeRace.entries.forEach((entry) => {
-                const button = document.createElement("button");
-                button.innerHTML = entry.carNumber;
-                button.classList.add("cars");
-                orientation.appendChild(button);
-                button.addEventListener("click", () => {
-                    recordLap(entry.carNumber);
-                });
-            });
+            mainTracker.classList.remove("hidden")
 
-            status.innerHTML = "Race session is " + activeRace.status;
+            activeRace.entries.forEach((entry) => {
+                const button = document.createElement("button")
+                button.innerHTML = entry.carNumber
+                button.classList.add("cars")
+                orientation.appendChild(button)
+                button.addEventListener("click", () => {
+                    recordLap(entry.carNumber)
+                })
+            })
+
+            status.innerHTML = "Race session is " + activeRace.status
         }        
 
         function recordLap(carNumber) {
-            if (!activeRace) return;
+            if (!activeRace) return
             socket.emit('laptime:add', {sessionId: activeRace.id, 
-                carNumber: carNumber});
+                carNumber: carNumber})
         }     
            
 
@@ -137,14 +139,14 @@
         function handleOrientationChange() {
             const isPortrait = window.matchMedia(
                 "(orientation: portrait)"
-            ).matches;
+            ).matches
 
-            orientation.classList.toggle("portrait", isPortrait);
-            orientation.classList.toggle("landscape", !isPortrait);
+            orientation.classList.toggle("portrait", isPortrait)
+            orientation.classList.toggle("landscape", !isPortrait)
         }
 
-        window.addEventListener("resize", handleOrientationChange);
+        window.addEventListener("resize", handleOrientationChange)
 
-        handleOrientationChange();      
+        handleOrientationChange()      
    </script>
 </html>
